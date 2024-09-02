@@ -1,4 +1,4 @@
-package ru.kabzex.views;
+package ru.kabzex.ui;
 
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -12,8 +12,8 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.lineawesome.LineAwesomeIcon;
-import ru.kabzex.views.about.AboutView;
-import ru.kabzex.views.helloworld.HelloWorldView;
+import ru.kabzex.ui.about.AboutView;
+import ru.kabzex.ui.sheets.SheetsView;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -39,7 +39,7 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
-        Span appName = new Span("My App");
+        Span appName = new Span("Формула ремонта");
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
         Header header = new Header(appName);
 
@@ -51,8 +51,8 @@ public class MainLayout extends AppLayout {
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
 
-        nav.addItem(new SideNavItem("Hello World", HelloWorldView.class, LineAwesomeIcon.GLOBE_SOLID.create()));
-        nav.addItem(new SideNavItem("About", AboutView.class, LineAwesomeIcon.FILE.create()));
+        nav.addItem(new SideNavItem("Смета", SheetsView.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
+        nav.addItem(new SideNavItem("О нас", AboutView.class, LineAwesomeIcon.FILE.create()));
 
         return nav;
     }

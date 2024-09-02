@@ -1,4 +1,4 @@
-package ru.kabzex.views.about;
+package ru.kabzex.ui.about;
 
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
@@ -7,9 +7,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import ru.kabzex.views.MainLayout;
+import ru.kabzex.ui.MainLayout;
 
-@PageTitle("About")
+@PageTitle("O нас")
 @Route(value = "about", layout = MainLayout.class)
 public class AboutView extends VerticalLayout {
 
