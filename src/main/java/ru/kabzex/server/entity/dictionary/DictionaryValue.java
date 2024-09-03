@@ -17,7 +17,7 @@ import ru.kabzex.server.enums.Dictionary;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "DICTIONARY_VALUE",
-        uniqueConstraints = @UniqueConstraint(name = "uniqueNames", columnNames = {"dictionary", "value", "deletion_date"}))
+        uniqueConstraints = @UniqueConstraint(name = "uniqueNames", columnNames = {"dictionary", "value", "delete_date"}))
 public class DictionaryValue extends AbstractEntity {
 
     /**
