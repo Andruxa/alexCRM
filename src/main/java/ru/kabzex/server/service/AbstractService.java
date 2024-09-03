@@ -20,6 +20,7 @@ import ru.kabzex.ui.vaadin.utils.NotificationUtils;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public abstract class AbstractService<E extends AbstractEntity, R extends EntityRepository<E>>
         implements CommonService<E> {
@@ -82,24 +83,24 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
 
     @Transactional
     public void softDelete(E entity) {
-        entity.setDeletionDate(LocalDate.now());
+        entity.setDeleteDate(LocalDate.now());
         repository.save(entity);
     }
 
     @Transactional
-    public void softDeleteById(Long entityId) {
+    public void softDeleteById(UUID entityId) {
         softDeleteById(entityId, LocalDate.now());
     }
 
     @Transactional
-    public void softDeleteById(Long entityId, LocalDate deletionDate) {
+    public void softDeleteById(UUID entityId, LocalDate deletionDate) {
         var entity = repository.getReferenceById(entityId);
-        entity.setDeletionDate(deletionDate);
+        entity.setDeleteDate(deletionDate);
         repository.save(entity);
     }
 
     @Transactional
-    public void softDeleteById(Set<Long> entityIds) {
+    public void softDeleteById(Set<UUID> entityIds) {
         LocalDate now = LocalDate.now();
         entityIds.forEach(id -> softDeleteById(id, now));
     }
@@ -115,12 +116,12 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
     }
 
     @Override
-    public E get(Long id) {
+    public E get(UUID id) {
         return repository.findByIdAndDeletionDateIsNull(id);
     }
 
     @Transactional
-    public <D extends AbstractDTO> D getAndMap(Long id, Class<D> dtoClass) {
+    public <D extends AbstractDTO> D getAndMap(UUID id, Class<D> dtoClass) {
         var entity = repository.findByIdAndDeletionDateIsNull(id);
         return mapper.map(entity, dtoClass);
     }
@@ -175,6 +176,6 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
     }
 
     private Specification<E> exists() {
-        return (wd, cq, cb) -> cb.isNull(wd.get(AbstractEntity_.deletionDate));
+        return (wd, cq, cb) -> cb.isNull(wd.get(AbstractEntity_.deleteDate));
     }
 }

@@ -3,6 +3,7 @@ package ru.kabzex.server.service;
 import ru.kabzex.server.entity.AbstractEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface CommonService<E extends AbstractEntity> {
     E saveIfNotExists(E entity);
@@ -19,5 +20,5 @@ public interface CommonService<E extends AbstractEntity> {
 
     Long count();
 
-    E get(Long id);
+    E get(UUID id);
 }

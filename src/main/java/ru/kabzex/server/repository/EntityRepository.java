@@ -6,12 +6,13 @@ import org.springframework.data.repository.NoRepositoryBean;
 import ru.kabzex.server.entity.AbstractEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 @NoRepositoryBean
-public interface EntityRepository<E extends AbstractEntity> extends JpaRepository<E, Long>, JpaSpecificationExecutor<E> {
+public interface EntityRepository<E extends AbstractEntity> extends JpaRepository<E, UUID>, JpaSpecificationExecutor<E> {
     List<E> findAllByDeletionDateIsNull();
 
-    E findByIdAndDeletionDateIsNull(Long id);
+    E findByIdAndDeletionDateIsNull(UUID id);
 
     Long countByDeletionDateIsNull();
 
