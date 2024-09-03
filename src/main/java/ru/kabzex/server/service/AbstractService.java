@@ -69,7 +69,7 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
 
     @Override
     public List<E> getAll() {
-        return repository.findAllByDeletionDateIsNull();
+        return repository.findAllByDeleteDateIsNull();
     }
 
     @Override
@@ -107,7 +107,7 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
 
     @Override
     public Long count() {
-        return repository.countByDeletionDateIsNull();
+        return repository.countByDeleteDateIsNull();
     }
 
     @Override
@@ -117,12 +117,12 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
 
     @Override
     public E get(UUID id) {
-        return repository.findByIdAndDeletionDateIsNull(id);
+        return repository.findByIdAndDeleteDateIsNull(id);
     }
 
     @Transactional
     public <D extends AbstractDTO> D getAndMap(UUID id, Class<D> dtoClass) {
-        var entity = repository.findByIdAndDeletionDateIsNull(id);
+        var entity = repository.findByIdAndDeleteDateIsNull(id);
         return mapper.map(entity, dtoClass);
     }
 

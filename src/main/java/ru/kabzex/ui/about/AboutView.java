@@ -7,10 +7,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
+import jakarta.annotation.security.PermitAll;
 import ru.kabzex.ui.MainLayout;
 
 @PageTitle("O нас")
-@Route(value = "about", layout = MainLayout.class)
+@Route(value = "", layout = MainLayout.class)
+@PermitAll
 public class AboutView extends VerticalLayout {
 
     public AboutView() {

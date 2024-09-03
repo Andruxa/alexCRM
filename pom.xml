@@ -110,6 +110,11 @@
             <artifactId>hibernate-jpamodelgen</artifactId>
             <version>6.3.0.Final</version>
         </dependency>
+        <!--security-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

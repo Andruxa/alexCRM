@@ -10,10 +10,10 @@ import java.util.UUID;
 
 @NoRepositoryBean
 public interface EntityRepository<E extends AbstractEntity> extends JpaRepository<E, UUID>, JpaSpecificationExecutor<E> {
-    List<E> findAllByDeletionDateIsNull();
+    List<E> findAllByDeleteDateIsNull();
 
-    E findByIdAndDeletionDateIsNull(UUID id);
+    E findByIdAndDeleteDateIsNull(UUID id);
 
-    Long countByDeletionDateIsNull();
+    Long countByDeleteDateIsNull();
 
 }
