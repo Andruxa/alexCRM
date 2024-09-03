@@ -82,7 +82,7 @@ public class DictionaryPage extends AbstractPage<DictionaryHeader, DictionaryBod
 
     private void handle(DictionaryBody.RecordDeleteEvent event) {
         ConfirmDialog confirmationDialog = new ConfirmDialog("Удаление записи", String.format("После нажатия запись \"%s\" будет удалена", event.getEntity().getValue()), e -> {
-            dictionaryValueService.softDeleteById(event.getEntity().getId());
+            dictionaryValueService.deleteById(event.getEntity().getId());
             getBody().refresh();
         });
         confirmationDialog.open();

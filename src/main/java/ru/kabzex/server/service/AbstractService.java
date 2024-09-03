@@ -1,5 +1,6 @@
 package ru.kabzex.server.service;
 
+import com.vaadin.flow.spring.security.AuthenticationContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,14 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.kabzex.server.entity.AbstractEntity;
 import ru.kabzex.server.entity.AbstractEntity_;
 import ru.kabzex.server.exception.UpdateNotAllowedException;
+import ru.kabzex.server.exception.SomeoneAlreadyModifiedEntityException;
 import ru.kabzex.server.repository.EntityRepository;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
 import ru.kabzex.ui.vaadin.dto.AbstractUpdatableDTO;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
-import ru.kabzex.ui.vaadin.utils.NotificationUtils;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,6 +28,8 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
         implements CommonService<E> {
     protected final R repository;
     protected final ModelMapper mapper;
+    @Autowired
+    protected AuthenticationContext authenticationContext;
 
     @Autowired
     protected AbstractService(R repository, ModelMapper mapper) {
@@ -34,10 +38,28 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
     }
 
     @Override
+    @Transactional
     public E save(E entity) {
+        var author = authenticationContext.getPrincipalName().orElse("UNKNOWN");
+        var currentDT = LocalDateTime.now();
+        if (entity.getId() != null && repository.existsById(entity.getId())) {
+            var old = Optional.ofNullable(get(entity.getId()));
+            if (old.isPresent()) {
+                var oldEntity = old.get();
+                oldEntity.setDeleteAuthor(author);
+                oldEntity.setDeleteDate(currentDT);
+                repository.save(oldEntity);
+            } else {
+                throw new SomeoneAlreadyModifiedEntityException("Данная запись была изменена в другом сеансе. Закройте окно и выполните действие заново");
+            }
+            entity.setId(null);
+        }
+        entity.setCreateAuthor(author);
+        entity.setCreateDate(currentDT);
         return repository.save(entity);
     }
 
+    @Transactional
     public <D extends AbstractDTO> E saveFromDto(D dto) {
         if (dto.getId() != null) {
             if (dto instanceof AbstractUpdatableDTO updatableDTO) {
@@ -48,7 +70,7 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
         } else {
             var entity = getEmptyEntity();
             mapper.map(dto, entity);
-            return repository.save(entity);
+            return save(entity);
         }
     }
 
@@ -59,12 +81,7 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
         E currentVersion = getEmptyEntity();
         mapper.map(dto, currentVersion);
         dto.updateEntity(previousVersion, currentVersion);
-        return repository.save(currentVersion);
-    }
-
-    @Override
-    public E saveIfNotExists(E entity) {
-        return repository.existsById(entity.getId()) ? entity : repository.save(entity);
+        return save(currentVersion);
     }
 
     @Override
@@ -73,36 +90,24 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
     }
 
     @Override
-    public void delete(E entity) {
-        try {
-            repository.delete(entity);
-        } catch (Exception exception) {
-            NotificationUtils.showError("Удаление невозможно! На данную запись есть ссылка в других таблицах.", exception);
-        }
-    }
-
     @Transactional
-    public void softDelete(E entity) {
-        entity.setDeleteDate(LocalDate.now());
+    public void delete(E entity) {
+        entity.setDeleteAuthor(authenticationContext.getPrincipalName().orElse("UNKNOWN"));
+        entity.setDeleteDate(LocalDateTime.now());
         repository.save(entity);
     }
 
     @Transactional
-    public void softDeleteById(UUID entityId) {
-        softDeleteById(entityId, LocalDate.now());
-    }
-
-    @Transactional
-    public void softDeleteById(UUID entityId, LocalDate deletionDate) {
+    public void deleteById(UUID entityId) {
         var entity = repository.getReferenceById(entityId);
-        entity.setDeleteDate(deletionDate);
+        entity.setDeleteDate(LocalDateTime.now());
+        entity.setDeleteAuthor(authenticationContext.getPrincipalName().orElse("UNKNOWN"));
         repository.save(entity);
     }
 
     @Transactional
     public void softDeleteById(Set<UUID> entityIds) {
-        LocalDate now = LocalDate.now();
-        entityIds.forEach(id -> softDeleteById(id, now));
+        entityIds.forEach(this::deleteById);
     }
 
     @Override
@@ -112,7 +117,7 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
 
     @Override
     public void saveAll(List<E> entities) {
-        repository.saveAll(entities);
+        entities.forEach(this::save);
     }
 
     @Override

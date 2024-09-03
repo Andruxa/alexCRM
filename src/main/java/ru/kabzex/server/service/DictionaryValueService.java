@@ -1,5 +1,6 @@
 package ru.kabzex.server.service;
 
+import jakarta.annotation.security.RolesAllowed;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
@@ -9,6 +10,7 @@ import ru.kabzex.server.entity.dictionary.DictionaryValue;
 import ru.kabzex.server.entity.dictionary.DictionaryValue_;
 import ru.kabzex.server.enums.Dictionary;
 import ru.kabzex.server.repository.DictionaryValueRepository;
+import ru.kabzex.server.security.Roles;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
@@ -19,6 +21,7 @@ import static ru.kabzex.server.utils.StringUtils.likeInUpperCase;
 
 @Slf4j
 @Service
+@RolesAllowed(Roles.ADMIN)
 public class DictionaryValueService extends AbstractService<DictionaryValue, DictionaryValueRepository> {
     public DictionaryValueService(DictionaryValueRepository repository, ModelMapper mapper) {
         super(repository, mapper);

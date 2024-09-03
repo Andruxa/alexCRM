@@ -1,37 +1,34 @@
 package ru.kabzex.server.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @MappedSuperclass
 @Getter
+@Setter
 public abstract class AbstractEntity implements Serializable {
     @Id
     @GeneratedValue
     private UUID id;
-    @Setter
     @Column(name = "create_date")
-    private LocalDate createDate;
-    @Setter
+    private LocalDateTime createDate;
     @Column(name = "delete_date")
-    private LocalDate deleteDate;
-    @Setter
-    @Column(name = "version")
+    private LocalDateTime deleteDate;
+
+    @Version
+    @Column(name = "version", nullable = false, columnDefinition = "bigint default 1")
     private Long version;
-    @Setter
+
     @Column(name = "create_author")
-    private UUID createAuthor;
-    @Setter
+    private String createAuthor;
+
     @Column(name = "delete_author")
-    private UUID deleteAuthor;
+    private String deleteAuthor;
 
     @Override
     public int hashCode() {

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.kabzex.server.entity.AbstractEntity;
+import ru.kabzex.server.entity.documents.Contract;
 import ru.kabzex.server.entity.employee.Employee;
 
 //Объект работ
@@ -20,5 +21,7 @@ public class WorkObject extends AbstractEntity {
     private String address;
     @ManyToOne
     private Employee employee;
+    @ManyToOne
+    private Contract objectContract;
 
 }

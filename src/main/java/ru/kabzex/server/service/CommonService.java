@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CommonService<E extends AbstractEntity> {
-    E saveIfNotExists(E entity);
 
     E save(E entity);
 
@@ -16,7 +15,7 @@ public interface CommonService<E extends AbstractEntity> {
 
     void delete(E entity);
 
-    void softDelete(E entity);
+    void deleteById(UUID id);
 
     Long count();
 

@@ -22,7 +22,7 @@ public class DictionaryHeader extends AbstractDataPagePart<DictionaryTypeDTO> {
         comboBox.setClearButtonVisible(true);
         comboBox.addValueChangeListener(this::comboboxValueChanged);
         comboBox.setClearButtonVisible(true);
-        var label = new NativeLabel("Фильтр справочников:");
+        var label = new NativeLabel("Доступные справочники:");
         add(label, comboBox);
     }
 
