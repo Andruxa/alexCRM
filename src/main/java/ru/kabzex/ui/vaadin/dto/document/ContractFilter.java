@@ -13,7 +13,8 @@ import java.util.Set;
 @Setter
 public class ContractFilter implements DTOFilter {
     private String contractNumber;
-    private LocalDate contractDate;
+    private LocalDate contractDateFrom;
+    private LocalDate contractDateTo;
     private PersonClientDto contractor;
     private Set<EmployeeDto> linkedEmployees;
 }
