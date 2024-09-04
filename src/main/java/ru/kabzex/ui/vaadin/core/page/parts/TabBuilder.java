@@ -20,7 +20,16 @@ public class TabBuilder {
     }
 
     public TabBuilder addNextPage(Tab tab, Component component) {
-        component.setVisible(false);
+        return addNextPage(tab, component, true);
+    }
+
+    public TabBuilder addNextPage(Tab tab, Component component, Boolean enabled) {
+        return addNextPage(tab, component, enabled, false);
+    }
+
+    public TabBuilder addNextPage(Tab tab, Component component, Boolean enabled, Boolean visible) {
+        component.setVisible(visible);
+        tab.setEnabled(enabled);
         tabsToPages.put(tab, component);
         return this;
     }

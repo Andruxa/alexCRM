@@ -20,9 +20,7 @@ import ru.kabzex.ui.vaadin.pages.contracts.ClientContractsPage;
 import ru.kabzex.ui.vaadin.pages.dictionary.DictionaryPage;
 import ru.kabzex.ui.vaadin.pages.employee.EmployeePage;
 import ru.kabzex.ui.vaadin.pages.incomes.IncomesPage;
-import ru.kabzex.ui.vaadin.pages.specialActivities.SpecialActivitiesPage;
-import ru.kabzex.ui.vaadin.pages.stuff.StuffPage;
-import ru.kabzex.ui.vaadin.pages.workstages.WorkStagesPage;
+import ru.kabzex.ui.vaadin.pages.workobjects.WorkObjectsPage;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -68,24 +66,12 @@ public class MainLayout extends AppLayout {
 
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
-
+        nav.addItem(new SideNavItem("Объекты", WorkObjectsPage.class, LineAwesomeIcon.FILE.create()));
         nav.addItem(new SideNavItem("О нас", AboutView.class, LineAwesomeIcon.FILE.create()));
-        if (authenticationContext.hasAnyRole(Roles.USER)){
-            nav.addItem(new SideNavItem("Итог", ClientContractsPage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
-        }else {
-
-        }
-        if (authenticationContext.hasAnyRole(Roles.ADMIN, Roles.EMPLOYEE)) {
-            nav.addItem(new SideNavItem("Платежи", IncomesPage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
-            nav.addItem(new SideNavItem("Работы", WorkStagesPage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
-            nav.addItem(new SideNavItem("Материалы", StuffPage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
-            nav.addItem(new SideNavItem("Спецмонтаж", SpecialActivitiesPage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
-        }
         if (authenticationContext.hasAnyRole(Roles.ADMIN)) {
             nav.addItem(new SideNavItem("Сотрудники", EmployeePage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
             nav.addItem(new SideNavItem("Справочники", DictionaryPage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
         }
-
         return nav;
     }
 
