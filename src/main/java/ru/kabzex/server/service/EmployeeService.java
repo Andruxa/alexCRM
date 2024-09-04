@@ -9,7 +9,7 @@ import ru.kabzex.server.entity.employee.Employee;
 import ru.kabzex.server.entity.employee.Employee_;
 import ru.kabzex.server.repository.EmployeeRepository;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
-import ru.kabzex.ui.vaadin.dto.employee.EmployeeSimpleFilter;
+import ru.kabzex.ui.vaadin.dto.employee.EmployeeFilter;
 
 import java.util.Optional;
 
@@ -30,14 +30,14 @@ public class EmployeeService extends AbstractService<Employee, EmployeeRepositor
 
     @Override
     protected Specification<Employee> parseFilter(Specification<Employee> eSpecification, DTOFilter filter) {
-        Optional<EmployeeSimpleFilter> optional = Optional.ofNullable((EmployeeSimpleFilter) filter);
+        Optional<EmployeeFilter> optional = Optional.ofNullable((EmployeeFilter) filter);
         return eSpecification
                 .and(nameLike(optional))
                 .and(positionIs(optional));
     }
 
-    private Specification<Employee> nameLike(Optional<EmployeeSimpleFilter> filter) {
-        var val = filter.map(EmployeeSimpleFilter::getName).orElse(null);
+    private Specification<Employee> nameLike(Optional<EmployeeFilter> filter) {
+        var val = filter.map(EmployeeFilter::getName).orElse(null);
         if (val == null) {
             return null;
         } else {
@@ -47,8 +47,8 @@ public class EmployeeService extends AbstractService<Employee, EmployeeRepositor
         }
     }
 
-    private Specification<Employee> positionIs(Optional<EmployeeSimpleFilter> filter) {
-        var val = filter.map(EmployeeSimpleFilter::getPosition).orElse(null);
+    private Specification<Employee> positionIs(Optional<EmployeeFilter> filter) {
+        var val = filter.map(EmployeeFilter::getPosition).orElse(null);
         if (val == null) {
             return null;
         } else {

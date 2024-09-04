@@ -19,7 +19,7 @@ import ru.kabzex.ui.vaadin.core.dialog.ConfirmDialog;
 import ru.kabzex.ui.vaadin.core.page.AbstractPage;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
-import ru.kabzex.ui.vaadin.dto.employee.EmployeeSimpleFilter;
+import ru.kabzex.ui.vaadin.dto.employee.EmployeeFilter;
 import ru.kabzex.ui.vaadin.pages.employee.dialog.EmployeeDialog;
 import ru.kabzex.ui.vaadin.pages.employee.parts.EmployeeBody;
 import ru.kabzex.ui.vaadin.pages.employee.parts.EmployeeFooter;
@@ -115,7 +115,7 @@ public class EmployeePage extends AbstractPage<EmployeeHeader, EmployeeBody, Emp
         return dialog;
     }
 
-    protected DataProvider<EmployeeDto, EmployeeSimpleFilter> getLazyBodyDataProvider(EmployeeSimpleFilter filter) {
+    protected DataProvider<EmployeeDto, EmployeeFilter> getLazyBodyDataProvider(EmployeeFilter filter) {
         return DataProvider.fromFilteringCallbacks(query -> {
                     int offset = query.getOffset();
                     int limit = query.getLimit();

@@ -70,7 +70,11 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         nav.addItem(new SideNavItem("О нас", AboutView.class, LineAwesomeIcon.FILE.create()));
-        nav.addItem(new SideNavItem("Итог", ClientContractsPage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
+        if (authenticationContext.hasAnyRole(Roles.USER)){
+            nav.addItem(new SideNavItem("Итог", ClientContractsPage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
+        }else {
+
+        }
         if (authenticationContext.hasAnyRole(Roles.ADMIN, Roles.EMPLOYEE)) {
             nav.addItem(new SideNavItem("Платежи", IncomesPage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));
             nav.addItem(new SideNavItem("Работы", WorkStagesPage.class, LineAwesomeIcon.FILE_EXCEL_SOLID.create()));

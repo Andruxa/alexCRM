@@ -6,7 +6,7 @@ import ru.kabzex.ui.vaadin.dto.DTOFilter;
 
 @Getter
 @Setter
-public class EmployeeSimpleFilter implements DTOFilter {
+public class EmployeeFilter implements DTOFilter {
     private String name;
     private String position;
 

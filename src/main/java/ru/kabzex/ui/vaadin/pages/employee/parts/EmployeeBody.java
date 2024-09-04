@@ -12,11 +12,11 @@ import ru.kabzex.server.entity.employee.Employee_;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
-import ru.kabzex.ui.vaadin.dto.employee.EmployeeSimpleFilter;
+import ru.kabzex.ui.vaadin.dto.employee.EmployeeFilter;
 
-public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, EmployeeSimpleFilter> {
+public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, EmployeeFilter> {
 
-    private EmployeeSimpleFilter currentFilter = new EmployeeSimpleFilter();
+    private EmployeeFilter currentFilter = new EmployeeFilter();
 
 
     private void filterChanged() {
@@ -24,7 +24,7 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
     }
 
     @Override
-    public void setDataProvider(DataProvider<EmployeeDto, EmployeeSimpleFilter> dataProvider) {
+    public void setDataProvider(DataProvider<EmployeeDto, EmployeeFilter> dataProvider) {
         grid.setDataProvider(dataProvider);
     }
 
@@ -97,9 +97,9 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
 
     public class FilterChangedEvent extends BodyEvent {
         @Getter
-        EmployeeSimpleFilter filter;
+        EmployeeFilter filter;
 
-        protected FilterChangedEvent(EmployeeBody source, EmployeeSimpleFilter value) {
+        protected FilterChangedEvent(EmployeeBody source, EmployeeFilter value) {
             super(source, null);
             this.filter = value;
         }
