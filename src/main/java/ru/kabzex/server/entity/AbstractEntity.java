@@ -17,18 +17,23 @@ public abstract class AbstractEntity implements Serializable {
     private UUID id;
     @Column(name = "create_date")
     private LocalDateTime createDate;
+    @Column(name = "modify_date")
+    private LocalDateTime modifyDate;
     @Column(name = "delete_date")
     private LocalDateTime deleteDate;
 
     @Version
-    @Column(name = "version", nullable = false, columnDefinition = "bigint default 1")
+    @Column(name = "version")
     private Long version;
 
-    @Column(name = "create_author")
-    private String createAuthor;
+    @Column(name = "createdBy")
+    private String createdBy;
 
-    @Column(name = "delete_author")
-    private String deleteAuthor;
+    @Column(name = "modifiedBy")
+    private String modifiedBy;
+
+    @Column(name = "deletedBy")
+    private String deletedBy;
 
     @Override
     public int hashCode() {

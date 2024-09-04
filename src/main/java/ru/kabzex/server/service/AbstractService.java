@@ -30,6 +30,8 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
     protected final ModelMapper mapper;
     @Autowired
     protected AuthenticationContext authenticationContext;
+    @Autowired
+    protected ArchiveService archiveService;
 
     @Autowired
     protected AbstractService(R repository, ModelMapper mapper) {
@@ -40,23 +42,26 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
     @Override
     @Transactional
     public E save(E entity) {
+        updateSystemFieldsAndSavePreviousVersion(entity);
+        return repository.save(entity);
+    }
+
+    protected void updateSystemFieldsAndSavePreviousVersion(E entity) {
         var author = authenticationContext.getPrincipalName().orElse("UNKNOWN");
         var currentDT = LocalDateTime.now();
         if (entity.getId() != null && repository.existsById(entity.getId())) {
             var old = Optional.ofNullable(get(entity.getId()));
             if (old.isPresent()) {
-                var oldEntity = old.get();
-                oldEntity.setDeleteAuthor(author);
-                oldEntity.setDeleteDate(currentDT);
-                repository.save(oldEntity);
+                archiveService.archiveEntity(old.get(), author);
             } else {
                 throw new SomeoneAlreadyModifiedEntityException("Данная запись была изменена в другом сеансе. Закройте окно и выполните действие заново");
             }
-            entity.setId(null);
+            entity.setModifiedBy(author);
+            entity.setModifyDate(currentDT);
+        } else {
+            entity.setCreateDate(currentDT);
+            entity.setCreatedBy(author);
         }
-        entity.setCreateAuthor(author);
-        entity.setCreateDate(currentDT);
-        return repository.save(entity);
     }
 
     @Transactional
@@ -92,7 +97,7 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
     @Override
     @Transactional
     public void delete(E entity) {
-        entity.setDeleteAuthor(authenticationContext.getPrincipalName().orElse("UNKNOWN"));
+        entity.setDeletedBy(authenticationContext.getPrincipalName().orElse("UNKNOWN"));
         entity.setDeleteDate(LocalDateTime.now());
         repository.save(entity);
     }
@@ -101,7 +106,7 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
     public void deleteById(UUID entityId) {
         var entity = repository.getReferenceById(entityId);
         entity.setDeleteDate(LocalDateTime.now());
-        entity.setDeleteAuthor(authenticationContext.getPrincipalName().orElse("UNKNOWN"));
+        entity.setDeletedBy(authenticationContext.getPrincipalName().orElse("UNKNOWN"));
         repository.save(entity);
     }
 
