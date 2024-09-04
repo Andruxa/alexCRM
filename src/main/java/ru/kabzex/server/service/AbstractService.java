@@ -111,7 +111,7 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
     }
 
     @Transactional
-    public void softDeleteById(Set<UUID> entityIds) {
+    public void deleteByIds(Set<UUID> entityIds) {
         entityIds.forEach(this::deleteById);
     }
 
