@@ -11,7 +11,7 @@ import jakarta.annotation.security.PermitAll;
 import ru.kabzex.ui.MainLayout;
 
 @PageTitle("O нас")
-@Route(value = "", layout = MainLayout.class)
+@Route(value = "about", layout = MainLayout.class)
 @PermitAll
 public class AboutView extends VerticalLayout {
 

@@ -1,5 +1,6 @@
 package ru.kabzex.server.entity.work;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Size;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 public class WorkActivitySpecial extends AbstractEntity {
     @ManyToOne
     private WorkStage workStage;
+    @Column(length = 2000)
     private String name;
     private LocalDate specialActivityDate;
     private String amount;

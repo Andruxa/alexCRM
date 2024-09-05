@@ -35,5 +35,6 @@ public class DictionaryValue extends AbstractEntity {
     /**
      * Описание
      */
+    @Column(length = 2000)
     private String description;
 }

@@ -15,6 +15,8 @@ F - Filter
  */
 public abstract class AbstractEditableGridPagePart<D extends DTO, F> extends AbstractReadOnlyGridPagePart<D, F> {
 
+    public static final String EDIT_COLUMN = "EDIT";
+
     protected Component editDelButtons(D dto) {
         Button delete = new Button();
         delete.setIcon(new Icon(CLOSE));

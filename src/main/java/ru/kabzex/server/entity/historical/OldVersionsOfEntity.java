@@ -18,6 +18,7 @@ import java.util.Map;
 @Entity
 public class OldVersionsOfEntity extends AbstractEntity {
     private String entityId;
+    private String entityClass;
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> value;
 }

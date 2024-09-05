@@ -1,5 +1,6 @@
 package ru.kabzex.server.entity.target;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ import ru.kabzex.server.entity.employee.Employee;
 @Entity
 public class WorkObject extends AbstractEntity {
     private String name;
+    @Column(length = 2000)
     private String address;
     @ManyToOne
     private Employee employee;

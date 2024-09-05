@@ -1,35 +1,95 @@
 package ru.kabzex.ui.vaadin.pages.workobjects.parts;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.grid.editor.EditorCancelEvent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import lombok.Getter;
-import ru.kabzex.server.entity.dictionary.DictionaryValue_;
 import ru.kabzex.server.entity.target.WorkObject_;
+import ru.kabzex.server.security.Roles;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
+import ru.kabzex.ui.vaadin.dto.AbstractDTO;
+import ru.kabzex.ui.vaadin.dto.document.ContractDto;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
 import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectDto;
 import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectFilter;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import static com.vaadin.flow.component.icon.VaadinIcon.CHECK;
+import static com.vaadin.flow.component.icon.VaadinIcon.CLOSE;
+
 public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter> {
     private WorkObjectFilter filter = new WorkObjectFilter();
+    private Collection<String> allowedRoles = List.of(Roles.EMPLOYEE, Roles.ADMIN);
+    private Component footer;
+    private DataProvider dataProvider;
+    private List<WorkObjectDto> tempDataList = new ArrayList<>();
 
     @Getter
     private Tab tab = new Tab("Объекты");
 
-    public WorkObjectBody() {
+
+    @Override
+    protected void configurePart() {
+        super.configurePart();
+        setFlexDirection(FlexDirection.COLUMN);
+        footer = configureFooter();
+        add(footer);
+    }
+
+    private Component configureFooter() {
+        var addSingleObservationButton = new Button("Добавить Объект");
+        addSingleObservationButton.addClickListener(this::createEvent);
+        var ft = new HorizontalLayout();
+        ft.setWidth("100%");
+        ft.add(addSingleObservationButton);
+        return ft;
+    }
+
+    @Override
+    public void onAttach() {
+        if (currentRoles.stream().noneMatch(allowedRoles::contains)) {
+            footer.setVisible(false);
+        }
+        configureGridEditor();
+    }
+
+    private void createEvent(ClickEvent<Button> event) {
+        if (currentRoles.stream().anyMatch(allowedRoles::contains)) {
+            if (grid.getEditor().isOpen()) {
+                grid.getEditor().cancel();
+            }
+            var dto = new WorkObjectDto();
+            tempDataList.add(dto);
+            grid.setItems(tempDataList);
+            grid.getEditor().editItem(dto);
+        }
     }
 
     @Override
     protected void editEvent(WorkObjectDto dto) {
-        fireEvent(new EditEvent(this, dto));
+        if (grid.getEditor().isOpen())
+            grid.getEditor().cancel();
+        grid.getEditor().editItem(dto);
     }
 
     @Override
@@ -40,6 +100,7 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
     @Override
     public void setDataProvider(DataProvider<WorkObjectDto, WorkObjectFilter> dataProvider) {
         getGrid().setDataProvider(dataProvider);
+        this.dataProvider = dataProvider;
     }
 
     @Override
@@ -50,6 +111,7 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
     @Override
     protected Grid<WorkObjectDto> configureGrid() {
         var grid = new Grid<>(WorkObjectDto.class, false);
+//        grid.setEmptyStateText("No employees found.");
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         grid.addColumn(this::parseContract)
                 .setHeader("Договор")
@@ -73,6 +135,7 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
                 .setFlexGrow(3);
         grid.addComponentColumn(this::editDelButtons)
                 .setFlexGrow(1)
+                .setKey(EDIT_COLUMN)
                 .setTextAlign(ColumnTextAlign.END);
         grid.setSizeFull();
         grid.setMultiSort(true);
@@ -130,12 +193,79 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         return grid;
     }
 
+    private void configureGridEditor() {
+        Editor<WorkObjectDto> editor = grid.getEditor();
+        Binder<WorkObjectDto> binder = new Binder<>(WorkObjectDto.class);
+        editor.setBinder(binder);
+        editor.setBuffered(true);
+
+        var employee = new ComboBox<EmployeeDto>();
+        employee.setWidthFull();
+        employee.setItemLabelGenerator(EmployeeDto::getName);
+        binder.forField(employee)
+                .bind(WorkObjectDto::getEmployee, WorkObjectDto::setEmployee);
+        grid.getColumnByKey(WorkObject_.EMPLOYEE).setEditorComponent(employee);
+
+        var contract = new ComboBox<ContractDto>();
+        contract.setWidthFull();
+        contract.setItemLabelGenerator(ContractDto::getFullDescription);
+        binder.forField(contract)
+                .bind(WorkObjectDto::getObjectContract, WorkObjectDto::setObjectContract);
+        grid.getColumnByKey(WorkObject_.OBJECT_CONTRACT).setEditorComponent(contract);
+
+        var name = new TextField();
+        name.setMaxLength(255);
+        name.setMinLength(1);
+        name.setWidthFull();
+        binder.forField(name)
+                .asRequired("Обязательное значение")
+                .bind(WorkObjectDto::getName, WorkObjectDto::setName);
+        grid.getColumnByKey(WorkObject_.NAME).setEditorComponent(name);
+
+        var address = new TextArea();
+        address.setMaxLength(512);
+        address.setWidthFull();
+        binder.forField(address)
+                .bind(WorkObjectDto::getAddress, WorkObjectDto::setAddress);
+        grid.getColumnByKey(WorkObject_.ADDRESS).setEditorComponent(address);
+
+        Button saveButton = new Button(CHECK.create(), e -> editor.save());
+        Button cancelButton = new Button(CLOSE.create(),
+                e -> {
+                    editCanceled(editor);
+                    editor.cancel();
+                });
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_ICON,
+                ButtonVariant.LUMO_ERROR);
+        HorizontalLayout actions = new HorizontalLayout(saveButton,
+                cancelButton);
+        actions.setPadding(false);
+        grid.getColumnByKey(EDIT_COLUMN).setEditorComponent(actions);
+    }
+
+    private void editCanceled(Editor<WorkObjectDto> editor) {
+        var item = Optional.ofNullable(editor.getItem());
+        if (item.map(AbstractDTO::getId).isEmpty()) {
+            if (dataProvider == null) {
+                tempDataList.clear();
+                getGrid().getDataProvider().refreshAll();
+            } else {
+                getGrid().setDataProvider(dataProvider);
+            }
+        }
+    }
+
+
     private String parseEmployee(WorkObjectDto workObjectDto) {
-        return workObjectDto.getEmployee().getName();
+        return Optional.of(workObjectDto)
+                .map(WorkObjectDto::getEmployee)
+                .map(EmployeeDto::getName).orElse("Отсутствует Менеджер");
     }
 
     private String parseContract(WorkObjectDto workObjectDto) {
-        return workObjectDto.getObjectContract().getFullDescription();
+        return Optional.of(workObjectDto)
+                .map(WorkObjectDto::getObjectContract)
+                .map(ContractDto::getFullDescription).orElse("Отсутствует договор");
     }
 
     private void editItem(ItemDoubleClickEvent<WorkObjectDto> workObjectDtoItemDoubleClickEvent) {
@@ -144,6 +274,13 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
 
     private void filterChanged() {
         fireEvent(new FilterChangedEvent(this, filter));
+    }
+
+    public class CreateEvent extends PagePartEvent {
+
+        protected CreateEvent(AbstractPagePart source) {
+            super(source, null);
+        }
     }
 
     public class EditEvent extends PagePartEvent<WorkObjectDto> {

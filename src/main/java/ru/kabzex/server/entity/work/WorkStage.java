@@ -1,5 +1,6 @@
 package ru.kabzex.server.entity.work;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
@@ -20,5 +21,6 @@ public class WorkStage extends AbstractEntity {
     @ManyToOne
     private WorkObject workObject;
     private String serialNumber;
+    @Column(length = 2000)
     private String name;
 }
