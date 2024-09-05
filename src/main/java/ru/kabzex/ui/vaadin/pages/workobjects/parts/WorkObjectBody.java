@@ -10,7 +10,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.component.grid.editor.Editor;
-import com.vaadin.flow.component.grid.editor.EditorCancelEvent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -21,6 +20,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import lombok.Getter;
 import ru.kabzex.server.entity.target.WorkObject_;
 import ru.kabzex.server.security.Roles;
+import ru.kabzex.ui.vaadin.core.dialog.ConfirmDialog;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
@@ -28,6 +28,7 @@ import ru.kabzex.ui.vaadin.dto.document.ContractDto;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
 import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectDto;
 import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectFilter;
+import ru.kabzex.ui.vaadin.utils.NotificationUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,12 +77,14 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
     private void createEvent(ClickEvent<Button> event) {
         if (currentRoles.stream().anyMatch(allowedRoles::contains)) {
             if (grid.getEditor().isOpen()) {
-                grid.getEditor().cancel();
+                NotificationUtils.showMessage("Запись уже редактируется");
+            } else {
+                tempDataList.clear();
+                var dto = new WorkObjectDto();
+                tempDataList.add(dto);
+                grid.setItems(tempDataList);
+                grid.getEditor().editItem(dto);
             }
-            var dto = new WorkObjectDto();
-            tempDataList.add(dto);
-            grid.setItems(tempDataList);
-            grid.getEditor().editItem(dto);
         }
     }
 
@@ -215,6 +218,7 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
 
         var name = new TextField();
         name.setMaxLength(255);
+        name.setRequired(true);
         name.setMinLength(1);
         name.setWidthFull();
         binder.forField(name)
@@ -229,12 +233,8 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
                 .bind(WorkObjectDto::getAddress, WorkObjectDto::setAddress);
         grid.getColumnByKey(WorkObject_.ADDRESS).setEditorComponent(address);
 
-        Button saveButton = new Button(CHECK.create(), e -> editor.save());
-        Button cancelButton = new Button(CLOSE.create(),
-                e -> {
-                    editCanceled(editor);
-                    editor.cancel();
-                });
+        Button saveButton = new Button(CHECK.create(), e -> editSave(editor));
+        Button cancelButton = new Button(CLOSE.create(), e -> editCanceled(editor));
         cancelButton.addThemeVariants(ButtonVariant.LUMO_ICON,
                 ButtonVariant.LUMO_ERROR);
         HorizontalLayout actions = new HorizontalLayout(saveButton,
@@ -246,11 +246,46 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
     private void editCanceled(Editor<WorkObjectDto> editor) {
         var item = Optional.ofNullable(editor.getItem());
         if (item.map(AbstractDTO::getId).isEmpty()) {
-            if (dataProvider == null) {
-                tempDataList.clear();
-                getGrid().getDataProvider().refreshAll();
+            ConfirmDialog confirmationDialog = new ConfirmDialog("Отмена создания",
+                    "После нажатия создание записи будет отменено",
+                    e -> {
+                        if (dataProvider != null) {
+                            getGrid().setDataProvider(dataProvider);
+                        } else {
+                            tempDataList.clear();
+                            getGrid().getDataProvider().refreshAll();
+                        }
+                        editor.cancel();
+                    });
+            confirmationDialog.open();
+        } else {
+            ConfirmDialog confirmationDialog = new ConfirmDialog("Отмена изменений",
+                    "После нажатия изменения будут отменены",
+                    e -> {
+                        editor.cancel();
+                    });
+            confirmationDialog.open();
+        }
+    }
+
+    private void editSave(Editor<WorkObjectDto> editor) {
+        var item = Optional.ofNullable(editor.getItem());
+        if (editor.save()) {
+            if (item.map(AbstractDTO::getId).isEmpty()) {
+                ConfirmDialog confirmationDialog = new ConfirmDialog("Сохранение записи",
+                        String.format("После нажатия запись \"%s\" будет сохранена", item.map(WorkObjectDto::getName).orElse("")),
+                        e -> {
+                            if (dataProvider != null) {
+                                getGrid().setDataProvider(dataProvider);
+                            }
+                            fireEvent(new SaveEvent(this, item.get()));
+                        });
+                confirmationDialog.open();
             } else {
-                getGrid().setDataProvider(dataProvider);
+                ConfirmDialog confirmationDialog = new ConfirmDialog("Обновление записи",
+                        String.format("После нажатия запись \"%s\" будет сохранена", item.map(WorkObjectDto::getName).orElse("")),
+                        e -> fireEvent(new EditEvent(this, item.get())));
+                confirmationDialog.open();
             }
         }
     }
@@ -276,10 +311,10 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         fireEvent(new FilterChangedEvent(this, filter));
     }
 
-    public class CreateEvent extends PagePartEvent {
+    public class SaveEvent extends PagePartEvent<WorkObjectDto> {
 
-        protected CreateEvent(AbstractPagePart source) {
-            super(source, null);
+        protected SaveEvent(AbstractPagePart source, WorkObjectDto dto) {
+            super(source, dto);
         }
     }
 

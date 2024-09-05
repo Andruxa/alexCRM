@@ -4,11 +4,15 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import ru.kabzex.server.security.Roles;
 import ru.kabzex.server.service.WorkObjectService;
 import ru.kabzex.ui.MainLayout;
@@ -18,6 +22,7 @@ import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectDto;
 import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectFilter;
 import ru.kabzex.ui.vaadin.pages.workobjects.parts.*;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 
@@ -48,6 +53,9 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
     @Override
     protected Component initBody() {
         objectList = new WorkObjectBody();
+        objectList.addListener(WorkObjectBody.SaveEvent.class, this::handle);
+        objectList.addListener(WorkObjectBody.EditEvent.class, this::handle);
+        objectList.addListener(WorkObjectBody.DeleteEvent.class, this::handle);
         objectInfo = new WorkObjectAgregateInfoBody();
         contractInfo = new ContractBody();
         incomeInfo = new IncomeBody();
@@ -68,6 +76,16 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
         return component;
     }
 
+    private void handle(WorkObjectBody.SaveEvent event) {
+        workObjectService.saveFromDto(event.getEntity());
+        objectList.refresh();
+    }
+
+    private void handle(WorkObjectBody.EditEvent event) {
+        workObjectService.saveFromDto(event.getEntity());
+        objectList.refresh();
+    }
+
     @Override
     protected Component initHeader() {
         return new WorkObjectHeader();
@@ -78,6 +96,7 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
         super.onAttach(attachEvent);
         objectList.setCurrentRoles(authenticationContext.getGrantedRoles());
         objectList.onAttach();
+        objectList.setDataProvider(getLazyObjectListDataProvider(null));
         clearBody();
     }
 
@@ -89,5 +108,25 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
         tabs.setSelectedTab(objectList.getTab());
         tabsMap.forEach((tab, component) -> component.setVisible(objectList.getTab().equals(tab)));
     }
+
+    private DataProvider<WorkObjectDto, WorkObjectFilter> getLazyObjectListDataProvider(WorkObjectFilter filter) {
+        return DataProvider.fromFilteringCallbacks(query -> {
+            int offset = query.getOffset();
+            int limit = query.getLimit();
+            var vaadinSortOrders = query.getSortOrders();
+            var springSortOrders = new ArrayList<Sort.Order>();
+            for (QuerySortOrder so : vaadinSortOrders) {
+                String colKey = so.getSorted();
+                if (so.getDirection() == SortDirection.ASCENDING) {
+                    springSortOrders.add(Sort.Order.asc(colKey));
+                } else {
+                    springSortOrders.add(Sort.Order.desc(colKey));
+                }
+            }
+            var page = workObjectService.getAllByFilterAndMap(filter, offset, limit, Sort.by(springSortOrders), WorkObjectDto.class);
+            return page.stream();
+        }, countQuery -> Math.toIntExact(workObjectService.countByFilter(filter)));
+    }
+
 
 }
