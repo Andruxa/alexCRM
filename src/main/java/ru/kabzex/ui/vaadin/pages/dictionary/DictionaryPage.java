@@ -1,6 +1,7 @@
 package ru.kabzex.ui.vaadin.pages.dictionary;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -14,15 +15,12 @@ import ru.kabzex.server.enums.Dictionary;
 import ru.kabzex.server.security.Roles;
 import ru.kabzex.server.service.DictionaryValueService;
 import ru.kabzex.ui.MainLayout;
-import ru.kabzex.ui.vaadin.core.dialog.ConfirmDialog;
-import ru.kabzex.ui.vaadin.core.page.AbstractPage;
-import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
+import ru.kabzex.ui.vaadin.core.page.AbstractSimplePage;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryTypeDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
 import ru.kabzex.ui.vaadin.pages.dictionary.dialog.DictionaryItemDialog;
 import ru.kabzex.ui.vaadin.pages.dictionary.parts.DictionaryBody;
-import ru.kabzex.ui.vaadin.pages.dictionary.parts.DictionaryFooter;
 import ru.kabzex.ui.vaadin.pages.dictionary.parts.DictionaryHeader;
 
 import java.util.ArrayList;
@@ -31,11 +29,12 @@ import java.util.Arrays;
 @PageTitle("Справочники")
 @Route(value = "dict", layout = MainLayout.class)
 @RolesAllowed({Roles.ADMIN})
-public class DictionaryPage extends AbstractPage<DictionaryHeader, DictionaryBody, DictionaryFooter> {
+public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, DictionaryBody, Component> {
     @Autowired
     private DictionaryValueService dictionaryValueService;
     @Autowired
     private ModelMapper modelMapper;
+
 
     private final DictionaryValueFilter currentFilter = new DictionaryValueFilter();
 
@@ -45,13 +44,13 @@ public class DictionaryPage extends AbstractPage<DictionaryHeader, DictionaryBod
         var types = Arrays.stream(Dictionary.values()).map(t -> modelMapper.map(t, DictionaryTypeDTO.class)).toList();
         getHeader().setData(types);
         getBody().setDataProvider(getLazyBodyDataProvider(null));
+        getBody().setCurrentRoles(authenticationContext.getGrantedRoles());
     }
 
+
     @Override
-    protected DictionaryFooter initFooter() {
-        DictionaryFooter footer = new DictionaryFooter();
-        footer.addListener(DictionaryFooter.AddRecordEvent.class, this::handle);
-        return footer;
+    protected Component initFooter() {
+        return null;
     }
 
     @Override
@@ -106,11 +105,6 @@ public class DictionaryPage extends AbstractPage<DictionaryHeader, DictionaryBod
             dictionaryItemDialog.setItem(value);
         }
         return dictionaryItemDialog;
-    }
-
-    private void handle(DictionaryFooter.AddRecordEvent event) {
-        DictionaryItemDialog dictionaryItemDialog = getDialog(null);
-        dictionaryItemDialog.open();
     }
 
     private void handle(DictionaryItemDialog.DictionaryValueConfirmedEvent event) {

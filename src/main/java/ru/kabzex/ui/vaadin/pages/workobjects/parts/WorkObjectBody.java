@@ -158,10 +158,6 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
                 .setSortProperty(WorkObject_.employee.getName())
                 .setKey(WorkObject_.EMPLOYEE)
                 .setFlexGrow(3);
-        grid.addComponentColumn(this::editDelButtons)
-                .setFlexGrow(1)
-                .setKey(EDIT_COLUMN)
-                .setTextAlign(ColumnTextAlign.END);
         grid.setSizeFull();
         grid.setMultiSort(true);
         grid.addItemDoubleClickListener(this::editItem);

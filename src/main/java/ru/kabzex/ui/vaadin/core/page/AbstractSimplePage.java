@@ -5,7 +5,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.kabzex.server.exception.NoHandlerException;
 import ru.kabzex.server.exception.handler.CustomExceptionHandler;
 
@@ -14,6 +16,9 @@ import java.util.stream.Stream;
 
 @Getter
 public abstract class AbstractSimplePage<H, B, F> extends VerticalLayout {
+
+    @Autowired
+    protected AuthenticationContext authenticationContext;
 
     private final H header;
     private final B body;

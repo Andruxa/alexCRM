@@ -1,11 +1,11 @@
 package ru.kabzex.ui.vaadin.core.page.parts;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.FooterRow;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.component.grid.editor.Editor;
@@ -14,7 +14,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
 import ru.kabzex.ui.vaadin.core.dialog.ConfirmDialog;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
-import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.utils.NotificationUtils;
 
 import java.util.Collection;
@@ -30,6 +29,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
 
     public static final String EDIT_COLUMN = "EDIT";
     protected Button addButton;
+    protected Collection<String> currentRoles;
 
     protected abstract Collection<String> getAllowedRoles();
 
@@ -110,17 +110,21 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
         }
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
+    public void setCurrentRoles(Collection<String> cr) {
+        this.currentRoles = cr;
         if (currentRoles != null &&
                 currentRoles.stream().anyMatch(getAllowedRoles()::contains)) {
-            getGrid().addComponentColumn(this::editDelButtons);
+            getGrid().addComponentColumn(this::editDelButtons).setKey(EDIT_COLUMN);
             getGrid().getColumnByKey(EDIT_COLUMN).setEditorComponent(this::editorButtons);
             configureEditor();
             configureFilters(getGrid().appendHeaderRow());
             configureAddButton(getGrid().appendFooterRow());
         }
+    }
+
+    @Override
+    protected Grid<D> initGrid() {
+        return null;
     }
 
     private Component editorButtons(D d) {
@@ -137,8 +141,8 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
     private void configureAddButton(FooterRow footerRow) {
         addButton = new Button("Добавить");
         addButton.addClickListener(this::createEvent);
-        var fcell = footerRow.join(footerRow.getCells());
-        fcell.setComponent(addButton);
+        setFlexDirection(FlexDirection.COLUMN);
+        add(new HorizontalLayout(addButton));
     }
 
     private void createEvent(ClickEvent<Button> event) {

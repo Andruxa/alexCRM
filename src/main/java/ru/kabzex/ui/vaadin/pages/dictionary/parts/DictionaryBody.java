@@ -8,16 +8,14 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.spring.security.AuthenticationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.kabzex.server.entity.dictionary.DictionaryValue_;
-import ru.kabzex.server.entity.target.WorkObject_;
 import ru.kabzex.server.enums.Dictionary;
 import ru.kabzex.server.security.Roles;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
-import ru.kabzex.ui.vaadin.dto.document.ContractDto;
-import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
-import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectDto;
 
 import java.util.Collection;
 import java.util.List;

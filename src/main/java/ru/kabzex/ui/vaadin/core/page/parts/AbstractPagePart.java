@@ -5,13 +5,10 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.shared.Registration;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Collection;
 
 public abstract class AbstractPagePart extends FlexLayout {
-    @Setter
-    protected Collection<String> currentRoles;
 
     @Override
     public <T extends ComponentEvent<?>> Registration addListener(Class<T> eventType,
