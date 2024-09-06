@@ -35,7 +35,7 @@ public class DictionaryValueService extends AbstractService<DictionaryValue, Dic
     @Transactional
     public <D extends AbstractDTO> List<D> getAllByCodeAndMap(Dictionary code, Class<D> dtoClass) {
         var filter = new DictionaryValueFilter();
-        filter.setType(code.getDescription());
+        filter.setType(code);
         return getAllByFilterAndMap(filter, dtoClass);
     }
 
@@ -51,9 +51,9 @@ public class DictionaryValueService extends AbstractService<DictionaryValue, Dic
                 .and(descLike((DictionaryValueFilter) filter));
     }
 
-    static Specification<DictionaryValue> dictionaryType(DictionaryValueFilter type) {
-        if (type == null || type.getType() == null || type.getType().isEmpty()) return null;
-        return dictionaryType(Dictionary.getByValue(type.getType()));
+    static Specification<DictionaryValue> dictionaryType(DictionaryValueFilter filter) {
+        if (filter == null || filter.getType() == null) return null;
+        return dictionaryType(filter.getType());
     }
 
     static Specification<DictionaryValue> valueLike(DictionaryValueFilter filter) {

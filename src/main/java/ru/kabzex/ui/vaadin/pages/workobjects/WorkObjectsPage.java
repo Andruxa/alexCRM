@@ -53,9 +53,9 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
     @Override
     protected Component initBody() {
         objectList = new WorkObjectBody();
-        objectList.addListener(WorkObjectBody.SaveEvent.class, this::handle);
-        objectList.addListener(WorkObjectBody.EditEvent.class, this::handle);
-        objectList.addListener(WorkObjectBody.DeleteEvent.class, this::handle);
+//        objectList.addListener(WorkObjectBody.SaveEvent.class, this::handle);
+//        objectList.addListener(WorkObjectBody.EditEvent.class, this::handle);
+//        objectList.addListener(WorkObjectBody.DeleteEvent.class, this::handle);
         objectInfo = new WorkObjectAgregateInfoBody();
         contractInfo = new ContractBody();
         incomeInfo = new IncomeBody();
@@ -95,7 +95,6 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         objectList.setCurrentRoles(authenticationContext.getGrantedRoles());
-        objectList.onAttach();
         objectList.setDataProvider(getLazyObjectListDataProvider(null));
         clearBody();
     }

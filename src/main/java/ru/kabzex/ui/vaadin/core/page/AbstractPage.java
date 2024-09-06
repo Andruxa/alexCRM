@@ -39,7 +39,7 @@ public abstract class AbstractPage<H extends AbstractPagePart,
     protected abstract H initHeader();
 
     public <T extends ComponentEvent<?>> void handle(T t) {
-        throw new NoHandlerException("unknown event");
+        throw new NoHandlerException("Сценарий не реализован");
     }
 
     @Override

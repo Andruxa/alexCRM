@@ -54,10 +54,10 @@ public class EmployeePage extends AbstractPage<EmployeeHeader, EmployeeBody, Emp
     @Override
     protected EmployeeBody initBody() {
         EmployeeBody body = new EmployeeBody();
-        body.addListener(EmployeeBody.FilterChangedEvent.class, this::handle);
-        body.addListener(EmployeeBody.RecordEditEvent.class, this::handle);
-        body.addListener(EmployeeBody.RecordCreateEvent.class, this::handle);
-        body.addListener(EmployeeBody.RecordDeleteEvent.class, this::handle);
+//        body.addListener(EmployeeBody.FilterChangedEvent.class, this::handle);
+//        body.addListener(EmployeeBody.RecordEditEvent.class, this::handle);
+//        body.addListener(EmployeeBody.RecordCreateEvent.class, this::handle);
+//        body.addListener(EmployeeBody.RecordDeleteEvent.class, this::handle);
         return body;
     }
 
@@ -71,17 +71,17 @@ public class EmployeePage extends AbstractPage<EmployeeHeader, EmployeeBody, Emp
         dialog.open();
     }
 
-    private void handle(EmployeeBody.FilterChangedEvent event) {
+ /*   private void handle(EmployeeBody.FilterChangedEvent event) {
         getBody().setDataProvider(getLazyBodyDataProvider(event.getFilter()));
-    }
+    }*/
 
-    private void handle(EmployeeBody.RecordDeleteEvent event) {
+    /*private void handle(EmployeeBody.RecordDeleteEvent event) {
         ConfirmDialog confirmationDialog = new ConfirmDialog("Удаление записи",
                 String.format("После нажатия будет удалена запись %s", event.getEntity().getName()),
                 e -> confirmedDeleteSelectedEmployee(event.getEntity().getId()));
         confirmationDialog.open();
     }
-
+*/
     private void confirmedDeleteSelectedEmployee(UUID id) {
         employeeService.deleteById(id);
         getBody().refresh();
@@ -92,11 +92,11 @@ public class EmployeePage extends AbstractPage<EmployeeHeader, EmployeeBody, Emp
         getBody().refresh();
     }
 
-    private void handle(EmployeeBody.RecordEditEvent event) {
+/*    private void handle(EmployeeBody.RecordEditEvent event) {
         var dto = employeeService.getAndMap(event.getEntity().getId(), EmployeeDto.class);
         var dialog = getDialog(dto);
         dialog.open();
-    }
+    }*/
 
     private EmployeeDialog getDialog(EmployeeDto value) {
         EmployeeDialog dialog = new EmployeeDialog();

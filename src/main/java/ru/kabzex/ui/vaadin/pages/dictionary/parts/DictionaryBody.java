@@ -1,40 +1,40 @@
 package ru.kabzex.ui.vaadin.pages.dictionary.parts;
 
-import com.vaadin.flow.component.grid.ColumnTextAlign;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
-import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import lombok.Getter;
 import ru.kabzex.server.entity.dictionary.DictionaryValue_;
+import ru.kabzex.server.entity.target.WorkObject_;
+import ru.kabzex.server.enums.Dictionary;
+import ru.kabzex.server.security.Roles;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
-import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
+import ru.kabzex.ui.vaadin.dto.document.ContractDto;
+import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
+import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectDto;
+
+import java.util.Collection;
+import java.util.List;
 
 public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter> {
 
+    private static final List<String> ALLOWED = List.of(Roles.EMPLOYEE, Roles.ADMIN);
     private DictionaryValueFilter filter = new DictionaryValueFilter();
 
-    private void editItem(ItemDoubleClickEvent<DictionaryValueDTO> event) {
-        editEvent(event.getItem());
-    }
-
     @Override
-    public void setDataProvider(DataProvider<DictionaryValueDTO, DictionaryValueFilter> dataProvider) {
-        grid.setDataProvider(dataProvider);
-    }
-
-    @Override
-    public void refresh() {
-        this.grid.getDataProvider().refreshAll();
-    }
-
-    @Override
-    protected Grid<DictionaryValueDTO> configureGrid() {
+    protected Grid<DictionaryValueDTO> initGrid() {
         var grid = new Grid<>(DictionaryValueDTO.class, false);
+        grid.addColumn(this::parseType)
+                .setKey(DictionaryValue_.DICTIONARY)
+                .setSortProperty(DictionaryValue_.dictionary.getName())
+                .setHeader("Справочник")
+                .setFlexGrow(3);
         grid.addColumn(DictionaryValueDTO::getValue)
                 .setKey(DictionaryValue_.VALUE)
                 .setSortProperty(DictionaryValue_.value.getName())
@@ -45,13 +45,36 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
                 .setSortProperty(DictionaryValue_.description.getName())
                 .setKey(DictionaryValue_.DESCRIPTION)
                 .setFlexGrow(3);
-        grid.addComponentColumn(this::editDelButtons)
-                .setFlexGrow(1)
-                .setTextAlign(ColumnTextAlign.END);
         grid.setSizeFull();
         grid.setMultiSort(true);
         grid.addItemDoubleClickListener(this::editItem);
-        HeaderRow filterHeader = grid.appendHeaderRow();
+        return grid;
+    }
+
+    private String parseType(DictionaryValueDTO dictionaryValueDTO) {
+        return dictionaryValueDTO.getType().getDescription();
+    }
+
+    @Override
+    protected Collection<String> getAllowedRoles() {
+        return ALLOWED;
+    }
+
+    @Override
+    protected void configureFilters(HeaderRow headerRow) {
+        HeaderRow filterHeader = headerRow;
+        //
+        var typeFilter = new ComboBox<Dictionary>();
+        typeFilter.setItemLabelGenerator(Dictionary::getDescription);
+        typeFilter.setClearButtonVisible(true);
+        typeFilter.setItems(Dictionary.values());
+        typeFilter.addValueChangeListener(event -> {
+                    filter.setType(event.getValue());
+                    filterChanged(filter);
+                }
+        );
+        typeFilter.setSizeFull();
+        filterHeader.getCell(getGrid().getColumnByKey(DictionaryValue_.DICTIONARY)).setComponent(typeFilter);
         //
         TextField valFilter = new TextField();
         valFilter.setMaxLength(255);
@@ -59,11 +82,11 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
         valFilter.setClearButtonVisible(true);
         valFilter.addValueChangeListener(event -> {
                     filter.setValue(event.getValue());
-                    filterChanged();
+                    filterChanged(filter);
                 }
         );
         valFilter.setSizeFull();
-        filterHeader.getCell(grid.getColumnByKey(DictionaryValue_.VALUE)).setComponent(valFilter);
+        filterHeader.getCell(getGrid().getColumnByKey(DictionaryValue_.VALUE)).setComponent(valFilter);
         //
         TextField descFilter = new TextField();
         descFilter.setMaxLength(255);
@@ -71,56 +94,46 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
         descFilter.setClearButtonVisible(true);
         descFilter.addValueChangeListener(event -> {
                     filter.setDescription(event.getValue());
-                    filterChanged();
+                    filterChanged(filter);
                 }
         );
         descFilter.setSizeFull();
-        filterHeader.getCell(grid.getColumnByKey(DictionaryValue_.DESCRIPTION)).setComponent(descFilter);
-        //
-        return grid;
+        filterHeader.getCell(getGrid().getColumnByKey(DictionaryValue_.DESCRIPTION)).setComponent(descFilter);
     }
 
     @Override
-    protected void editEvent(DictionaryValueDTO valueDTO) {
-        fireEvent(new RecordEditEvent(this, valueDTO));
+    protected void configureEditor() {
+        Editor<DictionaryValueDTO> editor = getGrid().getEditor();
+        Binder<DictionaryValueDTO> binder = new Binder<>(DictionaryValueDTO.class);
+        editor.setBinder(binder);
+        editor.setBuffered(true);
+
+        var type = new ComboBox<Dictionary>();
+        type.setWidthFull();
+        type.setItemLabelGenerator(Dictionary::getDescription);
+        type.setItems(Dictionary.values());
+        binder.forField(type)
+                .bind(DictionaryValueDTO::getType, DictionaryValueDTO::setType);
+        getGrid().getColumnByKey(DictionaryValue_.DICTIONARY).setEditorComponent(type);
+
+        var value = new TextField();
+        value.setWidthFull();
+        value.setRequired(true);
+        value.setMaxLength(255);
+        binder.forField(value)
+                .asRequired("Обязательное значение")
+                .bind(DictionaryValueDTO::getValue, DictionaryValueDTO::setValue);
+        getGrid().getColumnByKey(DictionaryValue_.VALUE).setEditorComponent(value);
+
+        var description = new TextArea();
+        description.setMaxLength(512);
+        binder.forField(description)
+                .bind(DictionaryValueDTO::getDescription, DictionaryValueDTO::setDescription);
+        getGrid().getColumnByKey(DictionaryValue_.DESCRIPTION).setEditorComponent(description);
     }
 
     @Override
-    protected void deleteEvent(DictionaryValueDTO valueDTO) {
-        fireEvent(new RecordDeleteEvent(this, valueDTO));
-    }
-
-    private void filterChanged() {
-        fireEvent(new FilterChangedEvent(this, filter));
-    }
-
-    public class FilterChangedEvent extends BodyEvent {
-        @Getter
-        private DictionaryValueFilter filter;
-
-        protected FilterChangedEvent(DictionaryBody source, DictionaryValueFilter value) {
-            super(source, null);
-            this.filter = value;
-        }
-    }
-
-    public class BodyEvent extends PagePartEvent<DictionaryValueDTO> {
-
-        protected BodyEvent(AbstractPagePart source, DictionaryValueDTO entity) {
-            super(source, entity);
-        }
-
-    }
-
-    public class RecordEditEvent extends BodyEvent {
-        protected RecordEditEvent(DictionaryBody source, DictionaryValueDTO value) {
-            super(source, value);
-        }
-    }
-
-    public class RecordDeleteEvent extends BodyEvent {
-        protected RecordDeleteEvent(DictionaryBody source, DictionaryValueDTO value) {
-            super(source, value);
-        }
+    protected DictionaryValueDTO getEmptyDto() {
+        return new DictionaryValueDTO();
     }
 }

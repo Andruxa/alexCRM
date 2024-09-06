@@ -13,8 +13,6 @@ public abstract class AbstractPagePart extends FlexLayout {
     @Setter
     protected Collection<String> currentRoles;
 
-    protected void onAttach(){}
-
     @Override
     public <T extends ComponentEvent<?>> Registration addListener(Class<T> eventType,
                                                                   ComponentEventListener<T> listener) {

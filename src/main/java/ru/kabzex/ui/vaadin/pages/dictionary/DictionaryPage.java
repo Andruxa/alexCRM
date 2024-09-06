@@ -16,6 +16,7 @@ import ru.kabzex.server.service.DictionaryValueService;
 import ru.kabzex.ui.MainLayout;
 import ru.kabzex.ui.vaadin.core.dialog.ConfirmDialog;
 import ru.kabzex.ui.vaadin.core.page.AbstractPage;
+import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryTypeDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
@@ -56,9 +57,9 @@ public class DictionaryPage extends AbstractPage<DictionaryHeader, DictionaryBod
     @Override
     protected DictionaryBody initBody() {
         DictionaryBody body = new DictionaryBody();
-        body.addListener(DictionaryBody.RecordEditEvent.class, this::handle);
-        body.addListener(DictionaryBody.RecordDeleteEvent.class, this::handle);
-        body.addListener(DictionaryBody.FilterChangedEvent.class, this::handle);
+//        body.addListener(AbstractEditableGridPagePart.EditEvent.class, this::handle);
+//        body.addListener(AbstractEditableGridPagePart.DeleteEvent.class, this::handle);
+//        body.addListener(AbstractEditableGridPagePart.FilterChangedEvent.class, this::handle);
         return body;
     }
 
@@ -69,7 +70,7 @@ public class DictionaryPage extends AbstractPage<DictionaryHeader, DictionaryBod
         return header;
     }
 
-    private void handle(DictionaryBody.FilterChangedEvent event) {
+/*    private void handle(DictionaryBody.FilterChangedEvent event) {
         currentFilter.setValue(event.getFilter().getValue());
         currentFilter.setDescription(event.getFilter().getDescription());
         getBody().setDataProvider(getLazyBodyDataProvider(currentFilter));
@@ -91,7 +92,7 @@ public class DictionaryPage extends AbstractPage<DictionaryHeader, DictionaryBod
     private void handle(DictionaryBody.RecordEditEvent event) {
         var dictionaryItemDialog = getDialog(event.getEntity());
         dictionaryItemDialog.open();
-    }
+    }*/
 
     private DictionaryItemDialog getDialog(DictionaryValueDTO value) {
         DictionaryItemDialog dictionaryItemDialog = new DictionaryItemDialog();

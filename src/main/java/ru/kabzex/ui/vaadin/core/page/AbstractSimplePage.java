@@ -37,7 +37,7 @@ public abstract class AbstractSimplePage<H, B, F> extends VerticalLayout {
     protected abstract H initHeader();
 
     public <T extends ComponentEvent<?>> void handle(T t) {
-        throw new NoHandlerException("unknown event");
+        throw new NoHandlerException("Сценарий не реализован");
     }
 
     @Override
