@@ -7,7 +7,7 @@ import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectDto;
 
 import java.util.Collection;
 
-public class WorkObjectAgregateInfoBody extends AbstractDataPagePart<Collection<WorkObjectDto>, WorkObjectDto> {
+public class WorkObjectAgregateInfoBody extends AbstractDataPagePart<Collection<WorkObjectDto>> {
     @Getter
     private final Tab tab = new Tab("Инфо");
 
@@ -17,17 +17,5 @@ public class WorkObjectAgregateInfoBody extends AbstractDataPagePart<Collection<
     @Override
     public void setData(Collection<WorkObjectDto> data) {
 
-    }
-
-    @Override
-    protected AttachedEvent getOnAttachEvent() {
-        return new AttachedEvent(this);
-    }
-
-    public class AttachedEvent extends AbstractDataPagePart.AttachedEvent {
-
-        public AttachedEvent(WorkObjectAgregateInfoBody source) {
-            super(source);
-        }
     }
 }

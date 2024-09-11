@@ -9,6 +9,7 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import lombok.Getter;
@@ -190,11 +191,6 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         fireEvent(new SelectedEvent(this, event.getFirstSelectedItem().orElse(null)));
     }
 
-    @Override
-    protected AttachedEvent getOnAttachEvent() {
-        return new AttachedEvent(this);
-    }
-
     private String parseEmployee(WorkObjectDto workObjectDto) {
         return Optional.of(workObjectDto)
                 .map(WorkObjectDto::getEmployee)
@@ -242,10 +238,4 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         }
     }
 
-    public class AttachedEvent extends AbstractDataPagePart.AttachedEvent {
-
-        public AttachedEvent(WorkObjectBody source) {
-            super(source);
-        }
-    }
 }

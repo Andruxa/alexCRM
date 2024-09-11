@@ -130,11 +130,6 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
         }
     }
 
-    @Override
-    protected Grid<D> initGrid() {
-        return null;
-    }
-
     private Component editorButtons(D d) {
         Button saveButton = new Button(CHECK.create(), e -> editorSave(getGrid().getEditor()));
         Button cancelButton = new Button(CLOSE.create(), e -> editorCanceled(getGrid().getEditor()));

@@ -52,9 +52,10 @@ public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Compon
         objectList.addListener(WorkObjectBody.EditEvent.class, this::handle);
         objectList.addListener(WorkObjectBody.DeleteEvent.class, this::handle);
         objectList.addListener(WorkObjectBody.FilterChangedEvent.class, this::handle);
-        objectList.addListener(WorkObjectBody.AttachedEvent.class, this::handle);
+        objectList.addAttachListener(this::handle);
         objectList.addListener(WorkObjectBody.SelectedEvent.class, this::handle);
         var objectInfo = new WorkObjectAgregateInfoBody();
+        objectInfo.addAttachListener(this::handle);
         var contractInfo = new ContractBody();
         var incomeInfo = new IncomeBody();
         var activitiesInfo = new WorkActivitiesBody();
@@ -94,9 +95,11 @@ public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Compon
         ((WorkObjectBody) event.getSource()).refresh();
     }
 
-    private void handle(WorkObjectBody.AttachedEvent event) {
-        ((WorkObjectBody) event.getSource()).setCurrentRoles(authenticationContext.getGrantedRoles());
-        ((WorkObjectBody) event.getSource()).setData(getLazyObjectListDataProvider(null));
+    private void handle(AttachEvent attachEvent) {
+        if (attachEvent.getSource() instanceof WorkObjectBody wob) {
+            wob.setCurrentRoles(authenticationContext.getGrantedRoles());
+            wob.setData(getLazyObjectListDataProvider(null));
+        }
     }
 
     private void handle(WorkObjectBody.SelectedEvent event) {
@@ -131,7 +134,10 @@ public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Compon
 
     private void disableTabs() {
         tabs.setSelectedTab(mainTab);
-        tabsMap.forEach((tab, component) -> component.setVisible(mainTab.equals(tab)));
+        tabsMap.forEach((tab, component) -> {
+            component.setVisible(mainTab.equals(tab));
+            tab.setEnabled(mainTab.equals(tab));
+        });
     }
 
     private DataProvider<WorkObjectDto, WorkObjectFilter> getLazyObjectListDataProvider(WorkObjectFilter filter) {

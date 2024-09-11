@@ -11,7 +11,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import ru.kabzex.server.entity.dictionary.DictionaryValue_;
 import ru.kabzex.server.enums.Dictionary;
 import ru.kabzex.server.security.Roles;
-import ru.kabzex.ui.vaadin.core.page.parts.AbstractDataPagePart;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
@@ -150,11 +149,6 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
     }
 
     @Override
-    protected AttachedEvent getOnAttachEvent() {
-        return new AttachedEvent(this);
-    }
-
-    @Override
     protected FilterChangedEvent getFilterChanged(DictionaryValueFilter filter) {
         return new FilterChangedEvent(this, filter);
     }
@@ -184,13 +178,6 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
 
         protected FilterChangedEvent(DictionaryBody source, DictionaryValueFilter filter) {
             super(source, filter);
-        }
-    }
-
-    public class AttachedEvent extends AbstractDataPagePart.AttachedEvent {
-
-        public AttachedEvent(DictionaryBody source) {
-            super(source);
         }
     }
 

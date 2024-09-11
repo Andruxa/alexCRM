@@ -58,7 +58,7 @@ public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, Diction
         body.addListener(DictionaryBody.EditEvent.class, this::handle);
         body.addListener(DictionaryBody.DeleteEvent.class, this::handle);
         body.addListener(DictionaryBody.FilterChangedEvent.class, this::handle);
-        body.addListener(DictionaryBody.AttachedEvent.class, this::handle);
+        body.addAttachListener(this::handle);
         return body;
     }
 
@@ -66,7 +66,6 @@ public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, Diction
     protected DictionaryHeader initHeader() {
         DictionaryHeader header = new DictionaryHeader();
         header.addListener(DictionaryHeader.ComboboxChangedEvent.class, this::handle);
-        header.addListener(DictionaryHeader.AttachedEvent.class, this::handle);
         return header;
     }
 

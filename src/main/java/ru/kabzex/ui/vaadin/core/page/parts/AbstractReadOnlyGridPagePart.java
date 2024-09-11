@@ -5,12 +5,13 @@ import com.vaadin.flow.data.provider.DataProvider;
 import lombok.Getter;
 import ru.kabzex.ui.vaadin.dto.DTO;
 
-public abstract class AbstractReadOnlyGridPagePart<D extends DTO, F> extends AbstractDataPagePart<DataProvider<D, F>, D> {
+public abstract class AbstractReadOnlyGridPagePart<D extends DTO, F> extends AbstractDataPagePart<DataProvider<D, F>> {
 
     @Getter
     private final Grid<D> grid;
 
     protected AbstractReadOnlyGridPagePart() {
+        setSizeFull();
         this.grid = initGrid();
         this.grid.setSizeFull();
         add(grid);
