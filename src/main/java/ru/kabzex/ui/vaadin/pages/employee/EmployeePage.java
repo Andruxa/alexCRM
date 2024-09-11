@@ -15,7 +15,6 @@ import ru.kabzex.server.security.Roles;
 import ru.kabzex.server.service.DictionaryValueService;
 import ru.kabzex.server.service.EmployeeService;
 import ru.kabzex.ui.MainLayout;
-import ru.kabzex.ui.vaadin.core.dialog.ConfirmDialog;
 import ru.kabzex.ui.vaadin.core.page.AbstractPage;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
@@ -40,7 +39,7 @@ public class EmployeePage extends AbstractPage<EmployeeHeader, EmployeeBody, Emp
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        getBody().setDataProvider(getLazyBodyDataProvider(null));
+        getBody().setData(getLazyBodyDataProvider(null));
     }
 
     @Override

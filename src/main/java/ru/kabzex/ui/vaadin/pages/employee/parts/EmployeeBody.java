@@ -1,5 +1,6 @@
 package ru.kabzex.ui.vaadin.pages.employee.parts;
 
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -8,7 +9,6 @@ import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import lombok.Getter;
 import ru.kabzex.server.entity.employee.Employee_;
 import ru.kabzex.server.security.Roles;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
@@ -22,7 +22,7 @@ import java.util.List;
 
 public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, EmployeeFilter> {
     private static final Collection<String> ALLOWED = List.of(Roles.ADMIN);
-    private EmployeeFilter filter = new EmployeeFilter();
+    private final EmployeeFilter filter = new EmployeeFilter();
 
     @Override
     protected Grid<EmployeeDto> initGrid() {
@@ -38,6 +38,11 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
                 .setFlexGrow(1);
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
         return grid;
+    }
+
+    @Override
+    protected AttachedEvent getOnAttachEvent() {
+        return null;
     }
 
     @Override

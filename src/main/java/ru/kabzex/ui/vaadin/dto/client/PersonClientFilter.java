@@ -5,7 +5,6 @@ import lombok.Setter;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 @Getter

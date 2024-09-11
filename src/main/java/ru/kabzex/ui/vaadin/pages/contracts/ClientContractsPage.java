@@ -3,8 +3,6 @@ package ru.kabzex.ui.vaadin.pages.contracts;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
-import ru.kabzex.server.security.Roles;
 import ru.kabzex.ui.MainLayout;
 import ru.kabzex.ui.vaadin.core.page.AbstractSimplePage;
 import ru.kabzex.ui.vaadin.pages.contracts.parts.ClientContractBody;

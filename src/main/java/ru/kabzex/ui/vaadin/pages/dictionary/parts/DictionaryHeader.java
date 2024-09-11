@@ -9,8 +9,8 @@ import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryTypeDTO;
 
 import java.util.Collection;
 
-public class DictionaryHeader extends AbstractDataPagePart<DictionaryTypeDTO> {
-    private ComboBox<DictionaryTypeDTO> comboBox;
+public class DictionaryHeader extends AbstractDataPagePart<Collection<DictionaryTypeDTO>, DictionaryTypeDTO> {
+    private final ComboBox<DictionaryTypeDTO> comboBox;
 
     public DictionaryHeader() {
         setWidth("100%");
@@ -26,11 +26,6 @@ public class DictionaryHeader extends AbstractDataPagePart<DictionaryTypeDTO> {
         add(label, comboBox);
     }
 
-    public String getSelectedType() {
-        return this.comboBox.getValue() != null ?
-                this.comboBox.getValue().getName() : null;
-    }
-
     private void comboboxValueChanged(ComponentEvent<ComboBox<DictionaryTypeDTO>> event) {
         fireEvent(new ComboboxChangedEvent(this, event.getSource().getValue()));
     }
@@ -38,6 +33,11 @@ public class DictionaryHeader extends AbstractDataPagePart<DictionaryTypeDTO> {
     @Override
     public void setData(Collection<DictionaryTypeDTO> data) {
         comboBox.setItems(data);
+    }
+
+    @Override
+    protected AttachedEvent getOnAttachEvent() {
+        return new AttachedEvent(this);
     }
 
     public class HeaderEvent extends PagePartEvent<DictionaryTypeDTO> {
@@ -54,4 +54,11 @@ public class DictionaryHeader extends AbstractDataPagePart<DictionaryTypeDTO> {
         }
     }
 
+    public class AttachedEvent extends AbstractDataPagePart.AttachedEvent {
+
+        protected AttachedEvent(AbstractPagePart source) {
+            super(source);
+        }
+
+    }
 }

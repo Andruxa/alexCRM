@@ -16,7 +16,6 @@ import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectFilter;
 import java.util.Optional;
 
 import static ru.kabzex.server.utils.StringUtils.likeInUpperCase;
-import static ru.kabzex.server.utils.StringUtils.notEmpty;
 
 
 @Slf4j

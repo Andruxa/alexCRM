@@ -4,9 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import ru.kabzex.server.entity.target.WorkObject;
 import ru.kabzex.server.entity.work.WorkStuff;
-import ru.kabzex.server.repository.WorkObjectRepository;
 import ru.kabzex.server.repository.WorkStuffRepository;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
 

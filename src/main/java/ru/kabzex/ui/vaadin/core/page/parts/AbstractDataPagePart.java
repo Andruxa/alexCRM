@@ -1,11 +1,23 @@
 package ru.kabzex.ui.vaadin.core.page.parts;
 
 
-import ru.kabzex.ui.vaadin.dto.DTO;
+import com.vaadin.flow.component.AttachEvent;
 
-import java.util.Collection;
+public abstract class AbstractDataPagePart<DataContainer, D> extends AbstractPagePart {
+    public abstract void setData(DataContainer data);
 
-public abstract class AbstractDataPagePart<D extends DTO> extends AbstractPagePart {
-    public abstract void setData(Collection<D> data);
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        fireEvent(getOnAttachEvent());
+    }
 
+    protected abstract AttachedEvent getOnAttachEvent();
+
+    public class AttachedEvent extends PagePartEvent<D> {
+
+        protected AttachedEvent(AbstractPagePart source) {
+            super(source);
+        }
+    }
 }

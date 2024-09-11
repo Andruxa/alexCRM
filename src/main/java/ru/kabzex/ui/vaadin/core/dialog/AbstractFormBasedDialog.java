@@ -14,7 +14,7 @@ import ru.kabzex.ui.vaadin.dto.AbstractDTO;
 
 public abstract class AbstractFormBasedDialog<D extends AbstractDTO> extends Dialog {
     @Getter
-    private AbstractForm<D> form;
+    private final AbstractForm<D> form;
     private NativeLabel title;
 
     protected AbstractFormBasedDialog() {

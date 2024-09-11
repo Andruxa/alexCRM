@@ -1,14 +1,20 @@
 package ru.kabzex.ui.vaadin.core.page.parts;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.shared.Registration;
 import lombok.Getter;
 
-import java.util.Collection;
-
 public abstract class AbstractPagePart extends FlexLayout {
+
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        setWidthFull();
+    }
 
     @Override
     public <T extends ComponentEvent<?>> Registration addListener(Class<T> eventType,

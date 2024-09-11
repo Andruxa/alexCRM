@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 @UtilityClass
 public class ReportUtil {
     private final String PATTERN = "(\\$.*?})";
-    private Pattern compiled = Pattern.compile(PATTERN);
+    private final Pattern compiled = Pattern.compile(PATTERN);
     private static final String DOCUMENT_XML_NAME = "word/document.xml";
     private static final String TEMP_DOCUMENT_XML_NAME = "word/____document.xml";
 

@@ -6,7 +6,7 @@ import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
 
 public class WorkActivitiesBody extends AbstractPagePart {
     @Getter
-    private Tab tab = new Tab("Работы");
+    private final Tab tab = new Tab("Работы");
 
     public WorkActivitiesBody() {
     }

@@ -35,7 +35,6 @@ public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, Diction
     @Autowired
     private ModelMapper modelMapper;
 
-
     private final DictionaryValueFilter currentFilter = new DictionaryValueFilter();
 
     @Override
@@ -43,7 +42,7 @@ public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, Diction
         super.onAttach(attachEvent);
         var types = Arrays.stream(Dictionary.values()).map(t -> modelMapper.map(t, DictionaryTypeDTO.class)).toList();
         getHeader().setData(types);
-        getBody().setDataProvider(getLazyBodyDataProvider(null));
+        getBody().setData(getLazyBodyDataProvider(null));
         getBody().setCurrentRoles(authenticationContext.getGrantedRoles());
     }
 
@@ -56,9 +55,10 @@ public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, Diction
     @Override
     protected DictionaryBody initBody() {
         DictionaryBody body = new DictionaryBody();
-//        body.addListener(AbstractEditableGridPagePart.EditEvent.class, this::handle);
-//        body.addListener(AbstractEditableGridPagePart.DeleteEvent.class, this::handle);
-//        body.addListener(AbstractEditableGridPagePart.FilterChangedEvent.class, this::handle);
+        body.addListener(DictionaryBody.EditEvent.class, this::handle);
+        body.addListener(DictionaryBody.DeleteEvent.class, this::handle);
+        body.addListener(DictionaryBody.FilterChangedEvent.class, this::handle);
+        body.addListener(DictionaryBody.AttachedEvent.class, this::handle);
         return body;
     }
 
@@ -66,6 +66,7 @@ public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, Diction
     protected DictionaryHeader initHeader() {
         DictionaryHeader header = new DictionaryHeader();
         header.addListener(DictionaryHeader.ComboboxChangedEvent.class, this::handle);
+        header.addListener(DictionaryHeader.AttachedEvent.class, this::handle);
         return header;
     }
 

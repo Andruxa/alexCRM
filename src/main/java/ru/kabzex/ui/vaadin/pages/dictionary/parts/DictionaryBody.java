@@ -8,11 +8,10 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.spring.security.AuthenticationContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.kabzex.server.entity.dictionary.DictionaryValue_;
 import ru.kabzex.server.enums.Dictionary;
 import ru.kabzex.server.security.Roles;
+import ru.kabzex.ui.vaadin.core.page.parts.AbstractDataPagePart;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
@@ -23,7 +22,7 @@ import java.util.List;
 public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter> {
 
     private static final List<String> ALLOWED = List.of(Roles.EMPLOYEE, Roles.ADMIN);
-    private DictionaryValueFilter filter = new DictionaryValueFilter();
+    private final DictionaryValueFilter filter = new DictionaryValueFilter();
 
     @Override
     protected Grid<DictionaryValueDTO> initGrid() {
@@ -136,23 +135,63 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
     }
 
     @Override
-    protected AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.EditEvent getEditEvent(DictionaryValueDTO item) {
-        return null;
+    protected EditEvent getEditEvent(DictionaryValueDTO item) {
+        return new EditEvent(this, item);
     }
 
     @Override
-    protected AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.SaveEvent getSaveEvent(DictionaryValueDTO item) {
-        return null;
+    protected SaveEvent getSaveEvent(DictionaryValueDTO item) {
+        return new SaveEvent(this, item);
     }
 
     @Override
-    protected AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.DeleteEvent getDeleteEvent(DictionaryValueDTO item) {
-        return null;
+    protected DeleteEvent getDeleteEvent(DictionaryValueDTO item) {
+        return new DeleteEvent(this, item);
     }
 
     @Override
-    protected AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.FilterChangedEvent getFilterChanged(DictionaryValueFilter filter) {
-        return null;
+    protected AttachedEvent getOnAttachEvent() {
+        return new AttachedEvent(this);
+    }
+
+    @Override
+    protected FilterChangedEvent getFilterChanged(DictionaryValueFilter filter) {
+        return new FilterChangedEvent(this, filter);
+    }
+
+    public class EditEvent extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.EditEvent {
+
+        protected EditEvent(DictionaryBody source, DictionaryValueDTO dto) {
+            super(source, dto);
+        }
+    }
+
+    public class DeleteEvent extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.DeleteEvent {
+
+        protected DeleteEvent(DictionaryBody source, DictionaryValueDTO dto) {
+            super(source, dto);
+        }
+    }
+
+    public class SaveEvent extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.SaveEvent {
+
+        protected SaveEvent(DictionaryBody source, DictionaryValueDTO dto) {
+            super(source, dto);
+        }
+    }
+
+    public class FilterChangedEvent extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.FilterChangedEvent {
+
+        protected FilterChangedEvent(DictionaryBody source, DictionaryValueFilter filter) {
+            super(source, filter);
+        }
+    }
+
+    public class AttachedEvent extends AbstractDataPagePart.AttachedEvent {
+
+        public AttachedEvent(DictionaryBody source) {
+            super(source);
+        }
     }
 
 }

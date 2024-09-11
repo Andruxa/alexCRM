@@ -1,5 +1,6 @@
 package ru.kabzex.ui.vaadin.pages.workobjects.parts;
 
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -8,11 +9,14 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import lombok.Getter;
 import ru.kabzex.server.entity.target.WorkObject_;
 import ru.kabzex.server.security.Roles;
+import ru.kabzex.ui.vaadin.core.page.parts.AbstractDataPagePart;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
+import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
 import ru.kabzex.ui.vaadin.dto.document.ContractDto;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
 import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectDto;
@@ -24,9 +28,9 @@ import java.util.Optional;
 
 public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter> {
     private static final List<String> ALLOWED = List.of(Roles.EMPLOYEE, Roles.ADMIN);
-    private WorkObjectFilter filter = new WorkObjectFilter();
+    private final WorkObjectFilter filter = new WorkObjectFilter();
     @Getter
-    private Tab tab = new Tab("Объекты");
+    private final Tab tab = new Tab("Объекты");
 
     @Override
     protected Collection<String> getAllowedRoles() {
@@ -178,7 +182,17 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         grid.setSizeFull();
         grid.setMultiSort(true);
         grid.addItemDoubleClickListener(this::editItem);
+        grid.addSelectionListener(this::selected);
         return grid;
+    }
+
+    private void selected(SelectionEvent<Grid<WorkObjectDto>, WorkObjectDto> event) {
+        fireEvent(new SelectedEvent(this, event.getFirstSelectedItem().orElse(null)));
+    }
+
+    @Override
+    protected AttachedEvent getOnAttachEvent() {
+        return new AttachedEvent(this);
     }
 
     private String parseEmployee(WorkObjectDto workObjectDto) {
@@ -191,6 +205,13 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         return Optional.of(workObjectDto)
                 .map(WorkObjectDto::getObjectContract)
                 .map(ContractDto::getFullDescription).orElse("Отсутствует договор");
+    }
+
+    public class SelectedEvent extends AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.EditEvent {
+
+        protected SelectedEvent(WorkObjectBody source, WorkObjectDto dto) {
+            super(source, dto);
+        }
     }
 
     public class EditEvent extends AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.EditEvent {
@@ -218,6 +239,13 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
 
         protected FilterChangedEvent(WorkObjectBody source, WorkObjectFilter filter) {
             super(source, filter);
+        }
+    }
+
+    public class AttachedEvent extends AbstractDataPagePart.AttachedEvent {
+
+        public AttachedEvent(WorkObjectBody source) {
+            super(source);
         }
     }
 }

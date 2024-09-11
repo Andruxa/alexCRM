@@ -3,13 +3,11 @@ package ru.kabzex.server.entity.work;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.kabzex.server.entity.AbstractEntity;
-import ru.kabzex.server.entity.dictionary.DictionaryValue;
 
 import java.time.LocalDate;
 

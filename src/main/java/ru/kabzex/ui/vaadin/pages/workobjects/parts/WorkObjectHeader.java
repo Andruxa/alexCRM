@@ -5,7 +5,7 @@ import ru.kabzex.server.utils.StringUtils;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
 
 public class WorkObjectHeader extends AbstractPagePart {
-    private NativeLabel label;
+    private final NativeLabel label;
 
     public WorkObjectHeader() {
         setWidth("100%");
@@ -17,7 +17,8 @@ public class WorkObjectHeader extends AbstractPagePart {
     public void setLabel(String value) {
         var text = String.format("Выбранный объект: %s", value);
         label.setText(text);
-        label.setVisible(StringUtils.isEmpty(value));
+        setVisible(StringUtils.notEmpty(value));
     }
+
 
 }

@@ -24,26 +24,20 @@ import ru.kabzex.ui.vaadin.pages.workobjects.parts.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Optional;
 
 
 @PageTitle("Объекты")
 @Route(value = "", layout = MainLayout.class)
 @RolesAllowed({Roles.ADMIN, Roles.EMPLOYEE, Roles.USER})
 @RequiredArgsConstructor
-public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Component> {
+public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Component, Component> {
     private final WorkObjectService workObjectService;
     private final AuthenticationContext authenticationContext;
 
     private LinkedHashMap<Tab, Component> tabsMap;
     private Tabs tabs;
-    private WorkObjectDto selected;
-    WorkObjectBody objectList;
-    WorkObjectAgregateInfoBody objectInfo;
-    ContractBody contractInfo;
-    IncomeBody incomeInfo;
-    WorkActivitiesBody activitiesInfo;
-    WorkStuffBody stuffInfo;
-    WorkActivitiesSpecialBody specialInfo;
+    private Tab mainTab;
 
     @Override
     protected Component initFooter() {
@@ -52,17 +46,20 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
 
     @Override
     protected Component initBody() {
-        objectList = new WorkObjectBody();
+        var objectList = new WorkObjectBody();
+        mainTab = objectList.getTab();
         objectList.addListener(WorkObjectBody.SaveEvent.class, this::handle);
         objectList.addListener(WorkObjectBody.EditEvent.class, this::handle);
         objectList.addListener(WorkObjectBody.DeleteEvent.class, this::handle);
         objectList.addListener(WorkObjectBody.FilterChangedEvent.class, this::handle);
-        objectInfo = new WorkObjectAgregateInfoBody();
-        contractInfo = new ContractBody();
-        incomeInfo = new IncomeBody();
-        activitiesInfo = new WorkActivitiesBody();
-        stuffInfo = new WorkStuffBody();
-        specialInfo = new WorkActivitiesSpecialBody();
+        objectList.addListener(WorkObjectBody.AttachedEvent.class, this::handle);
+        objectList.addListener(WorkObjectBody.SelectedEvent.class, this::handle);
+        var objectInfo = new WorkObjectAgregateInfoBody();
+        var contractInfo = new ContractBody();
+        var incomeInfo = new IncomeBody();
+        var activitiesInfo = new WorkActivitiesBody();
+        var stuffInfo = new WorkStuffBody();
+        var specialInfo = new WorkActivitiesSpecialBody();
         TabBuilder tabBuilder = new TabBuilder();
         tabBuilder.addNextPage(objectList.getTab(), objectList, true);
         tabBuilder.addNextPage(objectInfo.getTab(), objectInfo, false);
@@ -93,20 +90,38 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
     }
 
     private void handle(WorkObjectBody.FilterChangedEvent event) {
-        ((WorkObjectBody) event.getSource()).setDataProvider(getLazyObjectListDataProvider(event.getEntity()));
+        ((WorkObjectBody) event.getSource()).setData(getLazyObjectListDataProvider(event.getEntity()));
         ((WorkObjectBody) event.getSource()).refresh();
     }
 
+    private void handle(WorkObjectBody.AttachedEvent event) {
+        ((WorkObjectBody) event.getSource()).setCurrentRoles(authenticationContext.getGrantedRoles());
+        ((WorkObjectBody) event.getSource()).setData(getLazyObjectListDataProvider(null));
+    }
+
+    private void handle(WorkObjectBody.SelectedEvent event) {
+        var selected = Optional.ofNullable(event.getEntity());
+        selected.ifPresentOrElse(this::selected, this::deselected);
+    }
+
+    private void deselected() {
+        getHeader().setLabel(null);
+        disableTabs();
+    }
+
+    private void selected(WorkObjectDto dto) {
+        getHeader().setLabel(dto.getName());
+        tabsMap.forEach(((tab, component) -> tab.setEnabled(true)));
+    }
+
     @Override
-    protected Component initHeader() {
+    protected WorkObjectHeader initHeader() {
         return new WorkObjectHeader();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        objectList.setCurrentRoles(authenticationContext.getGrantedRoles());
-        objectList.setDataProvider(getLazyObjectListDataProvider(null));
         clearBody();
     }
 
@@ -115,8 +130,8 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
     }
 
     private void disableTabs() {
-        tabs.setSelectedTab(objectList.getTab());
-        tabsMap.forEach((tab, component) -> component.setVisible(objectList.getTab().equals(tab)));
+        tabs.setSelectedTab(mainTab);
+        tabsMap.forEach((tab, component) -> component.setVisible(mainTab.equals(tab)));
     }
 
     private DataProvider<WorkObjectDto, WorkObjectFilter> getLazyObjectListDataProvider(WorkObjectFilter filter) {

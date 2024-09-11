@@ -16,10 +16,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 import ru.kabzex.server.security.Roles;
 import ru.kabzex.ui.about.AboutView;
-import ru.kabzex.ui.vaadin.pages.contracts.ClientContractsPage;
 import ru.kabzex.ui.vaadin.pages.dictionary.DictionaryPage;
 import ru.kabzex.ui.vaadin.pages.employee.EmployeePage;
-import ru.kabzex.ui.vaadin.pages.incomes.IncomesPage;
 import ru.kabzex.ui.vaadin.pages.workobjects.WorkObjectsPage;
 
 /**

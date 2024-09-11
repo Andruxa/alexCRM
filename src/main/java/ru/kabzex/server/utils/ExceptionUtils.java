@@ -27,7 +27,7 @@ public class ExceptionUtils {
         private String className;
 
         public static KnownExceptions getByValue(Class cl) {
-            if(cl.getPackageName().contains(KNOWN_EXCEPTIONS.getClassName())) return KNOWN_EXCEPTIONS;
+            if (cl.getPackageName().contains(KNOWN_EXCEPTIONS.getClassName())) return KNOWN_EXCEPTIONS;
             for (KnownExceptions v : values()) {
                 if (v.getClassName().equalsIgnoreCase(cl.getSimpleName())) {
                     return v;

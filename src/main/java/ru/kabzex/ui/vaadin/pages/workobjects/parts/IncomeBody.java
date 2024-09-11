@@ -6,7 +6,7 @@ import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
 
 public class IncomeBody extends AbstractPagePart {
     @Getter
-    private Tab tab = new Tab("Платежи");
+    private final Tab tab = new Tab("Платежи");
 
     public IncomeBody() {
     }

@@ -5,9 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.kabzex.server.entity.work.WorkActivity;
-import ru.kabzex.server.entity.work.WorkStuff;
 import ru.kabzex.server.repository.WorkActivityRepository;
-import ru.kabzex.server.repository.WorkStuffRepository;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
 
 

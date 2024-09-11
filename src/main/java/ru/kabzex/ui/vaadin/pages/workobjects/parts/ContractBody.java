@@ -6,7 +6,7 @@ import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
 
 public class ContractBody extends AbstractPagePart {
     @Getter
-    private Tab tab = new Tab("Договор");
+    private final Tab tab = new Tab("Договор");
 
     public ContractBody() {
     }
