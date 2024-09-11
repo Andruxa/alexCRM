@@ -12,6 +12,10 @@ public class StringUtils {
         return value == null || value.isEmpty();
     }
 
+    public static boolean notEmpty(String value) {
+        return !isEmpty(value);
+    }
+
     public static String emptyOrValue(String value) {
         return emptyOrValueWithPostfix(value, "");
     }

@@ -134,4 +134,25 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
     protected DictionaryValueDTO getEmptyDto() {
         return new DictionaryValueDTO();
     }
+
+    @Override
+    protected AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.EditEvent getEditEvent(DictionaryValueDTO item) {
+        return null;
+    }
+
+    @Override
+    protected AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.SaveEvent getSaveEvent(DictionaryValueDTO item) {
+        return null;
+    }
+
+    @Override
+    protected AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.DeleteEvent getDeleteEvent(DictionaryValueDTO item) {
+        return null;
+    }
+
+    @Override
+    protected AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.FilterChangedEvent getFilterChanged(DictionaryValueFilter filter) {
+        return null;
+    }
+
 }

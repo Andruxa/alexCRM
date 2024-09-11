@@ -1,6 +1,7 @@
 package ru.kabzex.server.service;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
+import jakarta.persistence.metamodel.SingularAttribute;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,18 +12,21 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kabzex.server.entity.AbstractEntity;
 import ru.kabzex.server.entity.AbstractEntity_;
+import ru.kabzex.server.entity.dictionary.DictionaryValue;
+import ru.kabzex.server.entity.dictionary.DictionaryValue_;
 import ru.kabzex.server.exception.SomeoneAlreadyModifiedEntityException;
 import ru.kabzex.server.exception.UpdateNotAllowedException;
 import ru.kabzex.server.repository.EntityRepository;
+import ru.kabzex.server.utils.StringUtils;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
 import ru.kabzex.ui.vaadin.dto.AbstractUpdatableDTO;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+
+import static ru.kabzex.server.utils.StringUtils.likeInUpperCase;
 
 public abstract class AbstractService<E extends AbstractEntity, R extends EntityRepository<E>>
         implements CommonService<E> {
@@ -187,5 +191,39 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
 
     private Specification<E> exists() {
         return (wd, cq, cb) -> cb.isNull(wd.get(AbstractEntity_.deleteDate));
+    }
+
+    <A> Specification<E> equality(SingularAttribute<E, A> attribute, Optional<A> value) {
+        return value.<Specification<E>>map(a -> (wd, cq, cb) -> cb.equal(wd.get(attribute.getName()), a))
+                .orElse(null);
+    }
+
+    Specification<E> stringLike(SingularAttribute<E, String> attribute, Optional<String> value) {
+        return value.filter(StringUtils::notEmpty).<Specification<E>>map(s -> (wd, cq, cb) ->
+                cb.like(cb.upper(wd.get(attribute.getName())),
+                        likeInUpperCase(s))).orElse(null);
+    }
+
+    Specification<E> dictionaryValueLike(SingularAttribute<E, DictionaryValue> attribute, Optional<String> value) {
+        return value.filter(StringUtils::notEmpty).<Specification<E>>map(s -> (wd, cq, cb) ->
+                cb.like(cb.upper(wd.get(attribute).get(DictionaryValue_.value)),
+                        likeInUpperCase(s))).orElse(null);
+    }
+
+    Specification<E> dateBetween(SingularAttribute<E, LocalDate> attribute, Optional<LocalDate> from, Optional<LocalDate> to) {
+        if (from.isPresent() || to.isPresent()) {
+            return (wd, cq, cb) ->
+                    cb.between(wd.get(attribute),
+                            from.map(ld -> ld.minusDays(1L)).orElse(LocalDate.MIN),
+                            to.map(ld -> ld.plusDays(1L)).orElse(LocalDate.MAX));
+        } else {
+            return null;
+        }
+    }
+
+    <A> Specification<E> in(SingularAttribute<E, A> attribute, Optional<Collection<A>> value) {
+        return value.<Specification<E>>map(s -> (wd, cq, cb) ->
+                wd.get(attribute.getName())
+                        .in(new HashSet<>(s))).orElse(null);
     }
 }

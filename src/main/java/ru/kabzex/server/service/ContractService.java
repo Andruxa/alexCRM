@@ -14,11 +14,8 @@ import ru.kabzex.ui.vaadin.dto.AbstractDTO;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
 import ru.kabzex.ui.vaadin.dto.document.ContractFilter;
 
-import java.time.LocalDate;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static ru.kabzex.server.utils.StringUtils.likeInUpperCase;
 
 
 @Slf4j
@@ -33,16 +30,12 @@ public class ContractService extends AbstractService<Contract, ContractRepositor
         return new Contract();
     }
 
-    //    private String contractNumber;
-//    private LocalDate contractDate;
-//    private PersonClientDto contractor;
-//    private Set<EmployeeDto> linkedEmployees;
     @Override
     protected Specification<Contract> parseFilter(Specification<Contract> specification, DTOFilter filter) {
         var f = Optional.ofNullable((ContractFilter) filter);
         return specification
-                .and(numberLike(f))
-                .and(dateBetween(f))
+                .and(stringLike(Contract_.contractNumber, f.map(ContractFilter::getContractNumber)))
+                .and(dateBetween(Contract_.contractDate, f.map(ContractFilter::getContractDateFrom), f.map(ContractFilter::getContractDateTo)))
                 .and(contractorIs(f))
                 .and(employeesIn(f));
     }
@@ -63,24 +56,5 @@ public class ContractService extends AbstractService<Contract, ContractRepositor
         ).orElse(null);
     }
 
-    private static Specification<Contract> dateBetween(Optional<ContractFilter> f) {
-        var from = f.map(ContractFilter::getContractDateFrom);
-        var to = f.map(ContractFilter::getContractDateTo);
-        if (from.isPresent() || to.isPresent()) {
-            return (wd, cq, cb) ->
-                    cb.between(wd.get(Contract_.contractDate),
-                            from.map(ld -> ld.minusDays(1L)).orElse(LocalDate.MIN),
-                            to.map(ld -> ld.plusDays(1L)).orElse(LocalDate.MAX));
-        } else {
-            return null;
-        }
-    }
-
-    private static Specification<Contract> numberLike(Optional<ContractFilter> filter) {
-        var val = filter.map(ContractFilter::getContractNumber);
-        return val.<Specification<Contract>>map(s -> (wd, cq, cb) ->
-                cb.like(cb.upper(wd.get(Contract_.contractNumber)),
-                        likeInUpperCase(s))).orElse(null);
-    }
 
 }

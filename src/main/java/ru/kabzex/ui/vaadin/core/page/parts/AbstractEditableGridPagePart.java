@@ -54,7 +54,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
     private void deleteEvent(D dto) {
         ConfirmDialog confirmationDialog = new ConfirmDialog("Удаление",
                 "После нажатия создание запись будет удалена",
-                e -> fireEvent(new DeleteEvent(this, dto)));
+                e -> fireEvent(getDeleteEvent(dto)));
         confirmationDialog.open();
     }
 
@@ -76,17 +76,25 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
                             } else {
                                 getGrid().setDataProvider(DataProvider.ofItems());
                             }
-                            fireEvent(new SaveEvent(this, item.get()));
+                            fireEvent(getSaveEvent(item.get()));
                         });
                 confirmationDialog.open();
             } else {
                 ConfirmDialog confirmationDialog = new ConfirmDialog("Обновление записи",
                         "После нажатия запись будет сохранена",
-                        e -> fireEvent(new EditEvent(this, item.get())));
+                        e -> fireEvent(getEditEvent(item.get()))/*new EditEvent(this, item.get()))*/);
                 confirmationDialog.open();
             }
         }
     }
+
+    protected abstract EditEvent getEditEvent(D item);
+
+    protected abstract SaveEvent getSaveEvent(D item);
+
+    protected abstract DeleteEvent getDeleteEvent(D item);
+
+    protected abstract FilterChangedEvent getFilterChanged(F filter);
 
     protected void editorCanceled(Editor<D> editor) {
         var item = Optional.ofNullable(editor.getItem());
@@ -159,7 +167,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
     }
 
     protected void filterChanged(F filter) {
-        fireEvent(new FilterChangedEvent(this, filter));
+        fireEvent(getFilterChanged(filter));
     }
 
     protected void editItem(ItemDoubleClickEvent<D> event) {

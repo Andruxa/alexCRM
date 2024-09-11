@@ -53,9 +53,10 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
     @Override
     protected Component initBody() {
         objectList = new WorkObjectBody();
-//        objectList.addListener(WorkObjectBody.SaveEvent.class, this::handle);
-//        objectList.addListener(WorkObjectBody.EditEvent.class, this::handle);
-//        objectList.addListener(WorkObjectBody.DeleteEvent.class, this::handle);
+        objectList.addListener(WorkObjectBody.SaveEvent.class, this::handle);
+        objectList.addListener(WorkObjectBody.EditEvent.class, this::handle);
+        objectList.addListener(WorkObjectBody.DeleteEvent.class, this::handle);
+        objectList.addListener(WorkObjectBody.FilterChangedEvent.class, this::handle);
         objectInfo = new WorkObjectAgregateInfoBody();
         contractInfo = new ContractBody();
         incomeInfo = new IncomeBody();
@@ -78,12 +79,22 @@ public class WorkObjectsPage extends AbstractSimplePage<Component, Component, Co
 
     private void handle(WorkObjectBody.SaveEvent event) {
         workObjectService.saveFromDto(event.getEntity());
-        objectList.refresh();
+        ((WorkObjectBody) event.getSource()).refresh();
     }
 
     private void handle(WorkObjectBody.EditEvent event) {
         workObjectService.saveFromDto(event.getEntity());
-        objectList.refresh();
+        ((WorkObjectBody) event.getSource()).refresh();
+    }
+
+    private void handle(WorkObjectBody.DeleteEvent event) {
+        workObjectService.deleteById(event.getEntity().getId());
+        ((WorkObjectBody) event.getSource()).refresh();
+    }
+
+    private void handle(WorkObjectBody.FilterChangedEvent event) {
+        ((WorkObjectBody) event.getSource()).setDataProvider(getLazyObjectListDataProvider(event.getEntity()));
+        ((WorkObjectBody) event.getSource()).refresh();
     }
 
     @Override

@@ -16,8 +16,7 @@ import ru.kabzex.ui.vaadin.dto.DTOFilter;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
 
 import java.util.List;
-
-import static ru.kabzex.server.utils.StringUtils.likeInUpperCase;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -39,34 +38,13 @@ public class DictionaryValueService extends AbstractService<DictionaryValue, Dic
         return getAllByFilterAndMap(filter, dtoClass);
     }
 
-    static Specification<DictionaryValue> dictionaryType(Dictionary type) {
-        return (wd, cq, cb) -> cb.equal(wd.get(DictionaryValue_.dictionary.getName()), type);
-    }
 
     @Override
     protected Specification<DictionaryValue> parseFilter(Specification<DictionaryValue> specification, DTOFilter filter) {
+        Optional<DictionaryValueFilter> optional = Optional.ofNullable((DictionaryValueFilter) filter);
         return specification
-                .and(dictionaryType((DictionaryValueFilter) filter))
-                .and(valueLike((DictionaryValueFilter) filter))
-                .and(descLike((DictionaryValueFilter) filter));
-    }
-
-    static Specification<DictionaryValue> dictionaryType(DictionaryValueFilter filter) {
-        if (filter == null || filter.getType() == null) return null;
-        return dictionaryType(filter.getType());
-    }
-
-    static Specification<DictionaryValue> valueLike(DictionaryValueFilter filter) {
-        if (filter == null || filter.getValue() == null || filter.getValue().isEmpty()) return null;
-        return (wd, cq, cb) ->
-                cb.like(cb.upper(wd.get(DictionaryValue_.value.getName())),
-                        likeInUpperCase(filter.getValue()));
-    }
-
-    static Specification<DictionaryValue> descLike(DictionaryValueFilter filter) {
-        if (filter == null || filter.getDescription() == null || filter.getDescription().isEmpty()) return null;
-        return (wd, cq, cb) ->
-                cb.like(cb.upper(wd.get(DictionaryValue_.description.getName())),
-                        likeInUpperCase(filter.getDescription()));
+                .and(equality(DictionaryValue_.dictionary, optional.map(DictionaryValueFilter::getType)))
+                .and(stringLike(DictionaryValue_.value, optional.map(DictionaryValueFilter::getValue)))
+                .and(stringLike(DictionaryValue_.description, optional.map(DictionaryValueFilter::getDescription)));
     }
 }
