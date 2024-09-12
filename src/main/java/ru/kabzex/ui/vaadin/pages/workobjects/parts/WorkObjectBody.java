@@ -9,15 +9,12 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import lombok.Getter;
 import ru.kabzex.server.entity.target.WorkObject_;
 import ru.kabzex.server.security.Roles;
-import ru.kabzex.ui.vaadin.core.page.parts.AbstractDataPagePart;
-import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
-import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
+import ru.kabzex.ui.vaadin.core.page.parts_v2.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.document.ContractDto;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
 import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectDto;
@@ -136,26 +133,6 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
     }
 
     @Override
-    protected AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.EditEvent getEditEvent(WorkObjectDto item) {
-        return new EditEvent(this, item);
-    }
-
-    @Override
-    protected AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.SaveEvent getSaveEvent(WorkObjectDto item) {
-        return new SaveEvent(this, item);
-    }
-
-    @Override
-    protected AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.DeleteEvent getDeleteEvent(WorkObjectDto item) {
-        return new DeleteEvent(this, item);
-    }
-
-    @Override
-    protected AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.FilterChangedEvent getFilterChanged(WorkObjectFilter filter) {
-        return new FilterChangedEvent(this, filter);
-    }
-
-    @Override
     protected Grid<WorkObjectDto> initGrid() {
         var grid = new Grid<>(WorkObjectDto.class, false);
 //        grid.setEmptyStateText("No employees found.");
@@ -182,7 +159,6 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
                 .setFlexGrow(3);
         grid.setSizeFull();
         grid.setMultiSort(true);
-        grid.addItemDoubleClickListener(this::editItem);
         grid.addSelectionListener(this::selected);
         return grid;
     }
@@ -203,39 +179,13 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
                 .map(ContractDto::getFullDescription).orElse("Отсутствует договор");
     }
 
-    public class SelectedEvent extends AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.EditEvent {
+    public class SelectedEvent extends ComponentEvent<WorkObjectBody> {
+
+        WorkObjectDto selected;
 
         protected SelectedEvent(WorkObjectBody source, WorkObjectDto dto) {
-            super(source, dto);
+            super(source, false);
+            this.selected = dto;
         }
     }
-
-    public class EditEvent extends AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.EditEvent {
-
-        protected EditEvent(WorkObjectBody source, WorkObjectDto dto) {
-            super(source, dto);
-        }
-    }
-
-    public class DeleteEvent extends AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.DeleteEvent {
-
-        protected DeleteEvent(WorkObjectBody source, WorkObjectDto dto) {
-            super(source, dto);
-        }
-    }
-
-    public class SaveEvent extends AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.SaveEvent {
-
-        protected SaveEvent(WorkObjectBody source, WorkObjectDto dto) {
-            super(source, dto);
-        }
-    }
-
-    public class FilterChangedEvent extends AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter>.FilterChangedEvent {
-
-        protected FilterChangedEvent(WorkObjectBody source, WorkObjectFilter filter) {
-            super(source, filter);
-        }
-    }
-
 }

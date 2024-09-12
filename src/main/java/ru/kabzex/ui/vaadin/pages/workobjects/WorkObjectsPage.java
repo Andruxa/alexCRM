@@ -2,6 +2,7 @@ package ru.kabzex.ui.vaadin.pages.workobjects;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -48,12 +49,12 @@ public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Compon
     protected Component initBody() {
         var objectList = new WorkObjectBody();
         mainTab = objectList.getTab();
-        objectList.addListener(WorkObjectBody.SaveEvent.class, this::handle);
-        objectList.addListener(WorkObjectBody.EditEvent.class, this::handle);
-        objectList.addListener(WorkObjectBody.DeleteEvent.class, this::handle);
-        objectList.addListener(WorkObjectBody.FilterChangedEvent.class, this::handle);
+        objectList.addCreateEventListener( this::handle);
+//        objectList.addListener(WorkObjectBody.EditEvent.class, this::handle);
+//        objectList.addListener(WorkObjectBody.DeleteEvent.class, this::handle);
+//        objectList.addListener(WorkObjectBody.FilterChangedEvent.class, this::handle);
         objectList.addAttachListener(this::handle);
-        objectList.addListener(WorkObjectBody.SelectedEvent.class, this::handle);
+        ComponentUtil.addListener(objectList, WorkObjectBody.SelectedEvent.class, this::handle);
         var objectInfo = new WorkObjectAgregateInfoBody();
         objectInfo.addAttachListener(this::handle);
         var contractInfo = new ContractBody();
@@ -74,7 +75,7 @@ public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Compon
         tabs = tabBuilder.getTabs();
         return component;
     }
-
+/*
     private void handle(WorkObjectBody.SaveEvent event) {
         workObjectService.saveFromDto(event.getEntity());
         ((WorkObjectBody) event.getSource()).refresh();
@@ -93,7 +94,7 @@ public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Compon
     private void handle(WorkObjectBody.FilterChangedEvent event) {
         ((WorkObjectBody) event.getSource()).setData(getLazyObjectListDataProvider(event.getEntity()));
         ((WorkObjectBody) event.getSource()).refresh();
-    }
+    }*/
 
     private void handle(AttachEvent attachEvent) {
         if (attachEvent.getSource() instanceof WorkObjectBody wob) {
@@ -102,10 +103,10 @@ public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Compon
         }
     }
 
-    private void handle(WorkObjectBody.SelectedEvent event) {
+/*    private void handle(WorkObjectBody.SelectedEvent event) {
         var selected = Optional.ofNullable(event.getEntity());
         selected.ifPresentOrElse(this::selected, this::deselected);
-    }
+    }*/
 
     private void deselected() {
         getHeader().setLabel(null);

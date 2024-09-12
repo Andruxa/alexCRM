@@ -2,6 +2,7 @@ package ru.kabzex.ui.vaadin.core.page.parts_v2;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -12,6 +13,7 @@ import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.shared.Registration;
 import lombok.Getter;
 import ru.kabzex.ui.vaadin.core.dialog.ConfirmDialog;
 import ru.kabzex.ui.vaadin.core.event.CreateEvent;
@@ -23,7 +25,9 @@ import ru.kabzex.ui.vaadin.dto.DTOFilter;
 import ru.kabzex.ui.vaadin.utils.NotificationUtils;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.vaadin.flow.component.icon.VaadinIcon.*;
 
@@ -40,6 +44,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
     @Getter
     private final Grid<D> grid;
     private DataProvider dataProvider;
+    private final Set<ComponentEventListener<CreateEvent<D>>> createListeners = new LinkedHashSet<>();
 
     protected abstract Collection<String> getAllowedRoles();
 
@@ -63,10 +68,12 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
         if (currentRoles != null &&
                 currentRoles.stream().anyMatch(getAllowedRoles()::contains)) {
             getGrid().addComponentColumn(this::gridEditDelButtons).setKey(EDIT_COLUMN);
+            getGrid().addItemDoubleClickListener(e -> editEvent(e.getItem()));
             getGrid().getColumnByKey(EDIT_COLUMN).setEditorComponent(this::editorEditDelButtons);
             configureEditor();
             configureFilters(getGrid().appendHeaderRow());
             configureAddButton(getGrid().appendFooterRow());
+            registerHandlers();
         }
     }
 
@@ -108,13 +115,13 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
         confirmationDialog.open();
     }
 
-    protected void editEvent(D dto) {
+    private void editEvent(D dto) {
         if (getGrid().getEditor().isOpen())
             getGrid().getEditor().cancel();
         getGrid().getEditor().editItem(dto);
     }
 
-    protected void editorSave(Editor<D> editor) {
+    private void editorSave(Editor<D> editor) {
         var item = Optional.ofNullable(editor.getItem());
         if (editor.getBinder().isValid() && item.isPresent()) {
             if (item.map(AbstractDTO::getId).isEmpty()) {
@@ -139,7 +146,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
         }
     }
 
-    protected void editorCanceled(Editor<D> editor) {
+    private void editorCanceled(Editor<D> editor) {
         var item = Optional.ofNullable(editor.getItem());
         if (item.map(AbstractDTO::getId).isEmpty()) {
             ConfirmDialog confirmationDialog = new ConfirmDialog("Отмена создания",
@@ -186,5 +193,18 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
         ComponentUtil.fireEvent(this, fe);
     }
 
+    private void registerHandlers() {
+        ComponentUtil.addListener(this, CreateEvent.class,
+                (ComponentEventListener) ((ComponentEventListener<CreateEvent<D>>) e ->
+                        createListeners.forEach(listener -> listener
+                                .onComponentEvent(e))
+                ));
+    }
 
+    public Registration addCreateEventListener(
+            ComponentEventListener<CreateEvent<D>> listener) {
+        createListeners.add(listener);
+        return () -> createListeners.remove(listener);
+    }
 }
+
