@@ -101,25 +101,4 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
         return new EmployeeDto();
     }
 
-    @Override
-    protected AbstractEditableGridPagePart<EmployeeDto, EmployeeFilter>.EditEvent getEditEvent(EmployeeDto item) {
-        return null;
-    }
-
-    @Override
-    protected AbstractEditableGridPagePart<EmployeeDto, EmployeeFilter>.SaveEvent getSaveEvent(EmployeeDto item) {
-        return null;
-    }
-
-    @Override
-    protected AbstractEditableGridPagePart<EmployeeDto, EmployeeFilter>.DeleteEvent getDeleteEvent(EmployeeDto item) {
-        return null;
-    }
-
-    @Override
-    protected AbstractEditableGridPagePart<EmployeeDto, EmployeeFilter>.FilterChangedEvent getFilterChanged(EmployeeFilter filter) {
-        return null;
-    }
-
-
 }

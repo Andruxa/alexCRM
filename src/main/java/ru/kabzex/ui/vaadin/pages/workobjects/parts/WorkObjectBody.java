@@ -14,7 +14,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import lombok.Getter;
 import ru.kabzex.server.entity.target.WorkObject_;
 import ru.kabzex.server.security.Roles;
-import ru.kabzex.ui.vaadin.core.page.parts_v2.AbstractEditableGridPagePart;
+import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.document.ContractDto;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
 import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectDto;
@@ -93,7 +93,6 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         Editor<WorkObjectDto> editor = getGrid().getEditor();
         Binder<WorkObjectDto> binder = new Binder<>(WorkObjectDto.class);
         editor.setBinder(binder);
-        editor.setBuffered(true);
 
         var employee = new ComboBox<EmployeeDto>();
         employee.setWidthFull();
@@ -180,7 +179,7 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
     }
 
     public class SelectedEvent extends ComponentEvent<WorkObjectBody> {
-
+        @Getter
         WorkObjectDto selected;
 
         protected SelectedEvent(WorkObjectBody source, WorkObjectDto dto) {

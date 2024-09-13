@@ -21,7 +21,6 @@ import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
 import ru.kabzex.ui.vaadin.pages.dictionary.dialog.DictionaryItemDialog;
 import ru.kabzex.ui.vaadin.pages.dictionary.parts.DictionaryBody;
-import ru.kabzex.ui.vaadin.pages.dictionary.parts.DictionaryHeader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +28,7 @@ import java.util.Arrays;
 @PageTitle("Справочники")
 @Route(value = "dict", layout = MainLayout.class)
 @RolesAllowed({Roles.ADMIN})
-public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, DictionaryBody, Component> {
+public class DictionaryPage extends AbstractSimplePage<Component, DictionaryBody, Component> {
     @Autowired
     private DictionaryValueService dictionaryValueService;
     @Autowired
@@ -40,8 +39,6 @@ public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, Diction
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        var types = Arrays.stream(Dictionary.values()).map(t -> modelMapper.map(t, DictionaryTypeDTO.class)).toList();
-        getHeader().setData(types);
         getBody().setData(getLazyBodyDataProvider(null));
         getBody().setCurrentRoles(authenticationContext.getGrantedRoles());
     }
@@ -55,18 +52,17 @@ public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, Diction
     @Override
     protected DictionaryBody initBody() {
         DictionaryBody body = new DictionaryBody();
-        body.addListener(DictionaryBody.EditEvent.class, this::handle);
-        body.addListener(DictionaryBody.DeleteEvent.class, this::handle);
-        body.addListener(DictionaryBody.FilterChangedEvent.class, this::handle);
+        body.addCreateEventListener(this::handle);
+        body.addUpdateEventListener(this::handle);
+        body.addDeleteEventListener(this::handle);
+        body.addFilterChangedEventListener(this::handle);
         body.addAttachListener(this::handle);
         return body;
     }
 
     @Override
-    protected DictionaryHeader initHeader() {
-        DictionaryHeader header = new DictionaryHeader();
-        header.addListener(DictionaryHeader.ComboboxChangedEvent.class, this::handle);
-        return header;
+    protected Component initHeader() {
+        return null;
     }
 
 /*    private void handle(DictionaryBody.FilterChangedEvent event) {
@@ -75,10 +71,7 @@ public class DictionaryPage extends AbstractSimplePage<DictionaryHeader, Diction
         getBody().setDataProvider(getLazyBodyDataProvider(currentFilter));
     }
 
-    private void handle(DictionaryHeader.ComboboxChangedEvent event) {
-        currentFilter.setType(event.getEntity() == null ? null : event.getEntity().getName());
-        getBody().setDataProvider(getLazyBodyDataProvider(currentFilter));
-    }
+
 
     private void handle(DictionaryBody.RecordDeleteEvent event) {
         ConfirmDialog confirmationDialog = new ConfirmDialog("Удаление записи", String.format("После нажатия запись \"%s\" будет удалена", event.getEntity().getValue()), e -> {

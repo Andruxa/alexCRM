@@ -43,7 +43,6 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
                 .setFlexGrow(3);
         grid.setSizeFull();
         grid.setMultiSort(true);
-        grid.addItemDoubleClickListener(this::editItem);
         return grid;
     }
 
@@ -131,54 +130,6 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
     @Override
     protected DictionaryValueDTO getEmptyDto() {
         return new DictionaryValueDTO();
-    }
-
-    @Override
-    protected EditEvent getEditEvent(DictionaryValueDTO item) {
-        return new EditEvent(this, item);
-    }
-
-    @Override
-    protected SaveEvent getSaveEvent(DictionaryValueDTO item) {
-        return new SaveEvent(this, item);
-    }
-
-    @Override
-    protected DeleteEvent getDeleteEvent(DictionaryValueDTO item) {
-        return new DeleteEvent(this, item);
-    }
-
-    @Override
-    protected FilterChangedEvent getFilterChanged(DictionaryValueFilter filter) {
-        return new FilterChangedEvent(this, filter);
-    }
-
-    public class EditEvent extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.EditEvent {
-
-        protected EditEvent(DictionaryBody source, DictionaryValueDTO dto) {
-            super(source, dto);
-        }
-    }
-
-    public class DeleteEvent extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.DeleteEvent {
-
-        protected DeleteEvent(DictionaryBody source, DictionaryValueDTO dto) {
-            super(source, dto);
-        }
-    }
-
-    public class SaveEvent extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.SaveEvent {
-
-        protected SaveEvent(DictionaryBody source, DictionaryValueDTO dto) {
-            super(source, dto);
-        }
-    }
-
-    public class FilterChangedEvent extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter>.FilterChangedEvent {
-
-        protected FilterChangedEvent(DictionaryBody source, DictionaryValueFilter filter) {
-            super(source, filter);
-        }
     }
 
 }

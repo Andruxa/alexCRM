@@ -2,22 +2,32 @@ package ru.kabzex.ui.vaadin.core.page.parts;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
-import com.vaadin.flow.component.grid.ItemDoubleClickEvent;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.shared.Registration;
+import lombok.Getter;
 import ru.kabzex.ui.vaadin.core.dialog.ConfirmDialog;
+import ru.kabzex.ui.vaadin.core.event.CreateEvent;
+import ru.kabzex.ui.vaadin.core.event.DeleteEvent;
+import ru.kabzex.ui.vaadin.core.event.FilterChangedEvent;
+import ru.kabzex.ui.vaadin.core.event.UpdateEvent;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
+import ru.kabzex.ui.vaadin.dto.DTOFilter;
 import ru.kabzex.ui.vaadin.utils.NotificationUtils;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.vaadin.flow.component.icon.VaadinIcon.*;
 
@@ -25,11 +35,19 @@ import static com.vaadin.flow.component.icon.VaadinIcon.*;
 D - DTO
 F - Filter
  */
-public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> extends AbstractReadOnlyGridPagePart<D, F> {
+public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F extends DTOFilter> extends AbstractDataPagePart<DataProvider<D, F>> {
 
     public static final String EDIT_COLUMN = "EDIT";
+
     protected Button addButton;
     protected Collection<String> currentRoles;
+    @Getter
+    private final Grid<D> grid;
+    private DataProvider dataProvider;
+    private final Set<ComponentEventListener<CreateEvent<D>>> createListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<UpdateEvent<D>>> updateListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<DeleteEvent<D>>> deleteListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<FilterChangedEvent<F>>> filterListeners = new LinkedHashSet<>();
 
     protected abstract Collection<String> getAllowedRoles();
 
@@ -39,9 +57,39 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
 
     protected abstract D getEmptyDto();
 
-    private DataProvider dataProvider;
+    protected abstract Grid<D> initGrid();
 
-    protected Component editDelButtons(D dto) {
+    protected AbstractEditableGridPagePart() {
+        setSizeFull();
+        this.grid = initGrid();
+        this.grid.setSizeFull();
+        add(grid);
+    }
+
+    public void setCurrentRoles(Collection<String> cr) {
+        this.currentRoles = cr;
+        if (currentRoles != null &&
+                currentRoles.stream().anyMatch(getAllowedRoles()::contains)) {
+            getGrid().addComponentColumn(this::gridEditDelButtons).setKey(EDIT_COLUMN);
+            getGrid().addItemDoubleClickListener(e -> editEvent(e.getItem()));
+            getGrid().getColumnByKey(EDIT_COLUMN).setEditorComponent(this::editorEditDelButtons);
+            configureEditor();
+            configureFilters(getGrid().appendHeaderRow());
+            configureAddButton(getGrid().appendFooterRow());
+            registerHandlers();
+        }
+    }
+
+    @Override
+    public void setData(DataProvider<D, F> data) {
+        getGrid().setDataProvider(data);
+    }
+
+    public void refresh() {
+        getGrid().getDataProvider().refreshAll();
+    }
+
+    private Component gridEditDelButtons(D dto) {
         Button delete = new Button();
         delete.setIcon(new Icon(CLOSE));
         delete.addClickListener(e -> deleteEvent(dto));
@@ -51,22 +99,34 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
         return new HorizontalLayout(edit, delete);
     }
 
+    private Component editorEditDelButtons(D d) {
+        Button saveButton = new Button(CHECK.create(), e -> editorSave(getGrid().getEditor()));
+        Button cancelButton = new Button(CLOSE.create(), e -> editorCanceled(getGrid().getEditor()));
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_ICON,
+                ButtonVariant.LUMO_ERROR);
+        HorizontalLayout actions = new HorizontalLayout(saveButton,
+                cancelButton);
+        actions.setPadding(false);
+        return actions;
+    }
+
     private void deleteEvent(D dto) {
-        ConfirmDialog confirmationDialog = new ConfirmDialog("Удаление",
+        final var event = new DeleteEvent<>(this, dto);
+        var confirmationDialog = new ConfirmDialog("Удаление",
                 "После нажатия создание запись будет удалена",
-                e -> fireEvent(getDeleteEvent(dto)));
+                e -> ComponentUtil.fireEvent(this, event));
         confirmationDialog.open();
     }
 
-    protected void editEvent(D dto) {
+    private void editEvent(D dto) {
         if (getGrid().getEditor().isOpen())
             getGrid().getEditor().cancel();
         getGrid().getEditor().editItem(dto);
     }
 
-    protected void editorSave(Editor<D> editor) {
+    private void editorSave(Editor<D> editor) {
         var item = Optional.ofNullable(editor.getItem());
-        if (editor.save() && item.isPresent()) {
+        if (editor.getBinder().isValid() && item.isPresent()) {
             if (item.map(AbstractDTO::getId).isEmpty()) {
                 ConfirmDialog confirmationDialog = new ConfirmDialog("Сохранение записи",
                         "После нажатия запись будет сохранена",
@@ -76,27 +136,19 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
                             } else {
                                 getGrid().setDataProvider(DataProvider.ofItems());
                             }
-                            fireEvent(getSaveEvent(item.get()));
+                            ComponentUtil.fireEvent(this, new CreateEvent<>(this, item.get()));
                         });
                 confirmationDialog.open();
             } else {
                 ConfirmDialog confirmationDialog = new ConfirmDialog("Обновление записи",
                         "После нажатия запись будет сохранена",
-                        e -> fireEvent(getEditEvent(item.get()))/*new EditEvent(this, item.get()))*/);
+                        e -> ComponentUtil.fireEvent(this, new UpdateEvent<>(this, item.get())));
                 confirmationDialog.open();
             }
         }
     }
 
-    protected abstract EditEvent getEditEvent(D item);
-
-    protected abstract SaveEvent getSaveEvent(D item);
-
-    protected abstract DeleteEvent getDeleteEvent(D item);
-
-    protected abstract FilterChangedEvent getFilterChanged(F filter);
-
-    protected void editorCanceled(Editor<D> editor) {
+    private void editorCanceled(Editor<D> editor) {
         var item = Optional.ofNullable(editor.getItem());
         if (item.map(AbstractDTO::getId).isEmpty()) {
             ConfirmDialog confirmationDialog = new ConfirmDialog("Отмена создания",
@@ -116,29 +168,6 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
                     e -> editor.cancel());
             confirmationDialog.open();
         }
-    }
-
-    public void setCurrentRoles(Collection<String> cr) {
-        this.currentRoles = cr;
-        if (currentRoles != null &&
-                currentRoles.stream().anyMatch(getAllowedRoles()::contains)) {
-            getGrid().addComponentColumn(this::editDelButtons).setKey(EDIT_COLUMN);
-            getGrid().getColumnByKey(EDIT_COLUMN).setEditorComponent(this::editorButtons);
-            configureEditor();
-            configureFilters(getGrid().appendHeaderRow());
-            configureAddButton(getGrid().appendFooterRow());
-        }
-    }
-
-    private Component editorButtons(D d) {
-        Button saveButton = new Button(CHECK.create(), e -> editorSave(getGrid().getEditor()));
-        Button cancelButton = new Button(CLOSE.create(), e -> editorCanceled(getGrid().getEditor()));
-        cancelButton.addThemeVariants(ButtonVariant.LUMO_ICON,
-                ButtonVariant.LUMO_ERROR);
-        HorizontalLayout actions = new HorizontalLayout(saveButton,
-                cancelButton);
-        actions.setPadding(false);
-        return actions;
     }
 
     private void configureAddButton(FooterRow footerRow) {
@@ -162,38 +191,55 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F> ext
     }
 
     protected void filterChanged(F filter) {
-        fireEvent(getFilterChanged(filter));
+        var fe = new FilterChangedEvent<>(this, filter);
+        ComponentUtil.fireEvent(this, fe);
     }
 
-    protected void editItem(ItemDoubleClickEvent<D> event) {
-        editEvent(event.getItem());
+    private void registerHandlers() {
+        ComponentUtil.addListener(this, CreateEvent.class,
+                (ComponentEventListener) ((ComponentEventListener<CreateEvent<D>>) e ->
+                        createListeners.forEach(listener -> listener
+                                .onComponentEvent(e))
+                ));
+        ComponentUtil.addListener(this, UpdateEvent.class,
+                (ComponentEventListener) ((ComponentEventListener<UpdateEvent<D>>) e ->
+                        updateListeners.forEach(listener -> listener
+                                .onComponentEvent(e))
+                ));
+        ComponentUtil.addListener(this, DeleteEvent.class,
+                (ComponentEventListener) ((ComponentEventListener<DeleteEvent<D>>) e ->
+                        deleteListeners.forEach(listener -> listener
+                                .onComponentEvent(e))
+                ));
+        ComponentUtil.addListener(this, FilterChangedEvent.class,
+                (ComponentEventListener) ((ComponentEventListener<FilterChangedEvent<F>>) e ->
+                        filterListeners.forEach(listener -> listener
+                                .onComponentEvent(e))
+                ));
     }
 
-    public class SaveEvent extends PagePartEvent<D> {
-
-        protected SaveEvent(AbstractPagePart source, D dto) {
-            super(source, dto);
-        }
+    public Registration addCreateEventListener(
+            ComponentEventListener<CreateEvent<D>> listener) {
+        createListeners.add(listener);
+        return () -> createListeners.remove(listener);
     }
 
-    public class EditEvent extends PagePartEvent<D> {
-
-        protected EditEvent(AbstractPagePart source, D dto) {
-            super(source, dto);
-        }
+    public Registration addUpdateEventListener(
+            ComponentEventListener<UpdateEvent<D>> listener) {
+        updateListeners.add(listener);
+        return () -> updateListeners.remove(listener);
     }
 
-    public class DeleteEvent extends PagePartEvent<D> {
-
-        protected DeleteEvent(AbstractPagePart source, D dto) {
-            super(source, dto);
-        }
+    public Registration addDeleteEventListener(
+            ComponentEventListener<DeleteEvent<D>> listener) {
+        deleteListeners.add(listener);
+        return () -> deleteListeners.remove(listener);
     }
 
-    public class FilterChangedEvent extends PagePartEvent<F> {
-
-        protected FilterChangedEvent(AbstractPagePart source, F filter) {
-            super(source, filter);
-        }
+    public Registration addFilterChangedEventListener(
+            ComponentEventListener<FilterChangedEvent<F>> listener) {
+        filterListeners.add(listener);
+        return () -> filterListeners.remove(listener);
     }
 }
+

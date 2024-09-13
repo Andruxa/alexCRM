@@ -14,9 +14,13 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import ru.kabzex.server.entity.target.WorkObject;
 import ru.kabzex.server.security.Roles;
 import ru.kabzex.server.service.WorkObjectService;
 import ru.kabzex.ui.MainLayout;
+import ru.kabzex.ui.vaadin.core.event.DeleteEvent;
+import ru.kabzex.ui.vaadin.core.event.FilterChangedEvent;
+import ru.kabzex.ui.vaadin.core.event.UpdateEvent;
 import ru.kabzex.ui.vaadin.core.page.AbstractSimplePage;
 import ru.kabzex.ui.vaadin.core.page.parts.TabBuilder;
 import ru.kabzex.ui.vaadin.dto.workobject.WorkObjectDto;
@@ -49,12 +53,13 @@ public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Compon
     protected Component initBody() {
         var objectList = new WorkObjectBody();
         mainTab = objectList.getTab();
-        objectList.addCreateEventListener( this::handle);
-//        objectList.addListener(WorkObjectBody.EditEvent.class, this::handle);
-//        objectList.addListener(WorkObjectBody.DeleteEvent.class, this::handle);
-//        objectList.addListener(WorkObjectBody.FilterChangedEvent.class, this::handle);
+        objectList.addCreateEventListener(this::handle);
+        objectList.addUpdateEventListener(this::handle);
+        objectList.addDeleteEventListener(this::handle);
+        objectList.addFilterChangedEventListener(this::handle);
         objectList.addAttachListener(this::handle);
         ComponentUtil.addListener(objectList, WorkObjectBody.SelectedEvent.class, this::handle);
+        //
         var objectInfo = new WorkObjectAgregateInfoBody();
         objectInfo.addAttachListener(this::handle);
         var contractInfo = new ContractBody();
@@ -75,26 +80,21 @@ public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Compon
         tabs = tabBuilder.getTabs();
         return component;
     }
-/*
-    private void handle(WorkObjectBody.SaveEvent event) {
-        workObjectService.saveFromDto(event.getEntity());
+
+    private void handle(UpdateEvent<WorkObjectDto> event) {
+        workObjectService.saveFromDto(event.getItem());
         ((WorkObjectBody) event.getSource()).refresh();
     }
 
-    private void handle(WorkObjectBody.EditEvent event) {
-        workObjectService.saveFromDto(event.getEntity());
+    private void handle(DeleteEvent<WorkObjectDto> event) {
+        workObjectService.deleteById(event.getItem().getId());
         ((WorkObjectBody) event.getSource()).refresh();
     }
 
-    private void handle(WorkObjectBody.DeleteEvent event) {
-        workObjectService.deleteById(event.getEntity().getId());
+    private void handle(FilterChangedEvent<WorkObjectFilter> event) {
+        ((WorkObjectBody) event.getSource()).setData(getLazyObjectListDataProvider(event.getFilter()));
         ((WorkObjectBody) event.getSource()).refresh();
     }
-
-    private void handle(WorkObjectBody.FilterChangedEvent event) {
-        ((WorkObjectBody) event.getSource()).setData(getLazyObjectListDataProvider(event.getEntity()));
-        ((WorkObjectBody) event.getSource()).refresh();
-    }*/
 
     private void handle(AttachEvent attachEvent) {
         if (attachEvent.getSource() instanceof WorkObjectBody wob) {
@@ -103,10 +103,10 @@ public class WorkObjectsPage extends AbstractSimplePage<WorkObjectHeader, Compon
         }
     }
 
-/*    private void handle(WorkObjectBody.SelectedEvent event) {
-        var selected = Optional.ofNullable(event.getEntity());
+    private void handle(WorkObjectBody.SelectedEvent event) {
+        var selected = Optional.ofNullable(event.getSelected());
         selected.ifPresentOrElse(this::selected, this::deselected);
-    }*/
+    }
 
     private void deselected() {
         getHeader().setLabel(null);
