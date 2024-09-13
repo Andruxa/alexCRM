@@ -16,6 +16,7 @@ import ru.kabzex.server.exception.NoHandlerException;
 import ru.kabzex.server.exception.handler.CustomExceptionHandler;
 import ru.kabzex.server.service.AbstractService;
 import ru.kabzex.ui.vaadin.core.event.*;
+import ru.kabzex.ui.vaadin.core.page.parts.AbstractDataPagePart;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
@@ -31,7 +32,6 @@ public abstract class AbstractDataPage extends VerticalLayout {
     private final AuthenticationContext authenticationContext;
     private Map<Class, AbstractService> serviceMap;
 
-
     protected AbstractDataPage(AuthenticationContext authenticationContext) {
         this.authenticationContext = authenticationContext;
         setSizeFull();
@@ -43,57 +43,68 @@ public abstract class AbstractDataPage extends VerticalLayout {
         Arrays.stream(services).forEach(s -> serviceMap.put(s.getEntityClass(), s));
     }
 
+    protected void registerDataComponent(AbstractDataPagePart component) {
+        component.setCurrentRoles(authenticationContext.getGrantedRoles());
+        if (component instanceof AbstractEditableGridPagePart<?, ?> editableGridPagePart) {
+            editableGridPagePart.addCreateEventListener(this::handle);
+            editableGridPagePart.addDeleteEventListener(this::handle);
+            editableGridPagePart.addUpdateEventListener(this::handle);
+            editableGridPagePart.addFilterChangedEventListener(this::handle);
+            editableGridPagePart.addDataRequiredEventListener(this::handle);
+            editableGridPagePart.addAttachListener(this::handle);
+        }
+    }
+
     protected AbstractService getService(Class type) {
         return serviceMap.get(type);
     }
 
-
-    public <T extends ComponentEvent<?>> void handle(T t) {
+    protected <T extends ComponentEvent<?>> void handle(T t) {
         throw new NoHandlerException("Сценарий не реализован");
     }
 
-    public <E extends AbstractEntity, D extends AbstractDTO<E>> void handle(CreateEvent<D> event) {
+    protected <E extends AbstractEntity, D extends AbstractDTO<E>> void handle(CreateEvent<D> event) {
         var item = event.getItem();
         var service = getService(item.getEntityClass());
         service.saveFromDto(item);
         event.getSource().refresh();
     }
 
-    public <E extends AbstractEntity, D extends AbstractDTO<E>> void handle(UpdateEvent<D> event) {
+    protected <E extends AbstractEntity, D extends AbstractDTO<E>> void handle(UpdateEvent<D> event) {
         var item = event.getItem();
         var service = getService(item.getEntityClass());
         service.saveFromDto(item);
         event.getSource().refresh();
     }
 
-    public <E extends AbstractEntity, D extends AbstractDTO<E>> void handle(DeleteEvent<D> event) {
+    protected <E extends AbstractEntity, D extends AbstractDTO<E>> void handle(DeleteEvent<D> event) {
         var item = event.getItem();
         var service = getService(item.getEntityClass());
         service.deleteById(event.getItem().getId());
         event.getSource().refresh();
     }
 
-    public void handle(RequestDataProviderEvent event) {
+    protected void handle(RequestDataProviderEvent event) {
         var source = event.getSource();
         source.setItems(getLazyObjectListDataProvider(event.getEntityClass(), event.getDataClass(), event.getFilter()));
     }
 
-    public void handle(FilterChangedEvent event) {
+    protected void handle(FilterChangedEvent event) {
         var source = event.getSource();
         var dto = source.getEmptyDto();
         source.setData(getLazyObjectListDataProvider(dto.getEntityClass(), dto.getClass(), source.getFilter()));
     }
 
-    public void handle(AttachEvent attachEvent) {
+    protected void handle(AttachEvent attachEvent) {
         if (attachEvent.getSource() instanceof AbstractEditableGridPagePart source) {
-            source.setCurrentRoles(getAuthenticationContext().getGrantedRoles());
             var dto = source.getEmptyDto();
-            source.setData(getLazyObjectListDataProvider(dto.getEntityClass(), dto.getClass(), source.getFilter()));
+            if (source.getGrid() != null) {
+                source.setData(getLazyObjectListDataProvider(dto.getEntityClass(), dto.getClass(), source.getFilter()));
+            }
         } else {
             throw new NoHandlerException("Инициализирующий сценарий не реализован");
         }
     }
-
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {

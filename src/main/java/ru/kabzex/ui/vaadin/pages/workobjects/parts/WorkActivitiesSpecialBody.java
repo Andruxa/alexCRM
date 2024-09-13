@@ -1,13 +1,49 @@
 package ru.kabzex.ui.vaadin.pages.workobjects.parts;
 
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.tabs.Tab;
 import lombok.Getter;
-import ru.kabzex.ui.vaadin.core.page.parts.AbstractPagePart;
+import ru.kabzex.server.security.Roles;
+import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
+import ru.kabzex.ui.vaadin.dto.work.WorkActivitySpecialDto;
+import ru.kabzex.ui.vaadin.dto.work.WorkActivitySpecialFilter;
 
-public class WorkActivitiesSpecialBody extends AbstractPagePart {
+import java.util.Collection;
+import java.util.List;
+
+public class WorkActivitiesSpecialBody extends AbstractEditableGridPagePart<WorkActivitySpecialDto, WorkActivitySpecialFilter> {
+    private static final List<String> ALLOWED = List.of(Roles.EMPLOYEE, Roles.ADMIN);
     @Getter
     private final Tab tab = new Tab("Спецмонтаж");
 
-    public WorkActivitiesSpecialBody() {
+    @Override
+    protected WorkActivitySpecialFilter initFilter() {
+        return null;
+    }
+
+    @Override
+    protected Collection<String> getAllowedRoles() {
+        return ALLOWED;
+    }
+
+    @Override
+    protected void configureFilters(HeaderRow headerRow) {
+
+    }
+
+    @Override
+    protected void configureEditor() {
+
+    }
+
+    @Override
+    public WorkActivitySpecialDto getEmptyDto() {
+        return new WorkActivitySpecialDto();
+    }
+
+    @Override
+    protected Grid<WorkActivitySpecialDto> initGrid() {
+        return null;
     }
 }

@@ -13,4 +13,8 @@ public class PersonClientDto extends AbstractUpdatableDTO {
     private String name;
     private Set<String> phoneNumbers;
     private Set<EmployeeDto> linkedEmployees;
+
+    public String getShortInfo() {
+        return String.format("%s(тел. %s)", name, String.join(",", phoneNumbers));
+    }
 }

@@ -37,20 +37,21 @@ public class WorkObjectsPage extends AbstractDataPage {
     protected void initBody() {
         var objectList = new WorkObjectBody();
         mainTab = objectList.getTab();
-        objectList.addCreateEventListener(this::handle);
-        objectList.addUpdateEventListener(this::handle);
-        objectList.addDeleteEventListener(this::handle);
-        objectList.addFilterChangedEventListener(this::handle);
-        objectList.addAttachListener(this::handle);
         ComponentUtil.addListener(objectList, WorkObjectBody.SelectedEvent.class, this::handle);
+        registerDataComponent(objectList);
         //
         var objectInfo = new WorkObjectAgregateInfoBody();
-//        objectInfo.addAttachListener(this::handle);
+        registerDataComponent(objectInfo);
         var contractInfo = new ContractBody();
+        registerDataComponent(contractInfo);
         var incomeInfo = new IncomeBody();
+        registerDataComponent(incomeInfo);
         var activitiesInfo = new WorkActivitiesBody();
+        registerDataComponent(activitiesInfo);
         var stuffInfo = new WorkStuffBody();
+        registerDataComponent(stuffInfo);
         var specialInfo = new WorkActivitiesSpecialBody();
+        registerDataComponent(specialInfo);
         TabBuilder tabBuilder = new TabBuilder();
         tabBuilder.addNextPage(objectList.getTab(), objectList, true);
         tabBuilder.addNextPage(objectInfo.getTab(), objectInfo, false);

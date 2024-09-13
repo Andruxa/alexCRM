@@ -63,15 +63,18 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
     protected AbstractEditableGridPagePart() {
         setSizeFull();
         this.grid = initGrid();
-        this.grid.setSizeFull();
-        add(grid);
+        if (grid != null) {
+            this.grid.setSizeFull();
+            add(grid);
+        }
     }
 
     @Override
     public void setCurrentRoles(Collection<String> cr) {
         super.setCurrentRoles(cr);
         if (currentRoles != null &&
-                currentRoles.stream().anyMatch(getAllowedRoles()::contains)) {
+                currentRoles.stream().anyMatch(getAllowedRoles()::contains)
+                && getGrid() != null) {
             getGrid().addComponentColumn(this::gridEditDelButtons).setKey(EDIT_COLUMN);
             getGrid().addItemDoubleClickListener(e -> editEvent(e.getItem()));
             getGrid().getColumnByKey(EDIT_COLUMN).setEditorComponent(this::editorEditDelButtons);
