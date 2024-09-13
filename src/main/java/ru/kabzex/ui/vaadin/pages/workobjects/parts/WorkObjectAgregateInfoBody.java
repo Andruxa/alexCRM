@@ -18,4 +18,9 @@ public class WorkObjectAgregateInfoBody extends AbstractDataPagePart<Collection<
     public void setData(Collection<WorkObjectDto> data) {
 
     }
+
+    @Override
+    public void refresh() {
+
+    }
 }

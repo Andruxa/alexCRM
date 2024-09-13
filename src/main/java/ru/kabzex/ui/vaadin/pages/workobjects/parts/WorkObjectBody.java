@@ -31,6 +31,11 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
     private final Tab tab = new Tab("Объекты");
 
     @Override
+    protected WorkObjectFilter initFilter() {
+        return new WorkObjectFilter();
+    }
+
+    @Override
     protected Collection<String> getAllowedRoles() {
         return ALLOWED;
     }
@@ -127,7 +132,7 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
     }
 
     @Override
-    protected WorkObjectDto getEmptyDto() {
+    public WorkObjectDto getEmptyDto() {
         return new WorkObjectDto();
     }
 

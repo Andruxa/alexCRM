@@ -39,6 +39,11 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
     }
 
     @Override
+    protected EmployeeFilter initFilter() {
+        return new EmployeeFilter();
+    }
+
+    @Override
     protected Collection<String> getAllowedRoles() {
         return ALLOWED;
     }
@@ -97,7 +102,7 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
     }
 
     @Override
-    protected EmployeeDto getEmptyDto() {
+    public EmployeeDto getEmptyDto() {
         return new EmployeeDto();
     }
 

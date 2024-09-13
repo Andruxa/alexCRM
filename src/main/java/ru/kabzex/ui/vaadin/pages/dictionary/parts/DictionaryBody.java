@@ -21,7 +21,6 @@ import java.util.List;
 public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter> {
 
     private static final List<String> ALLOWED = List.of(Roles.EMPLOYEE, Roles.ADMIN);
-    private final DictionaryValueFilter filter = new DictionaryValueFilter();
 
     @Override
     protected Grid<DictionaryValueDTO> initGrid() {
@@ -48,6 +47,11 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
 
     private String parseType(DictionaryValueDTO dictionaryValueDTO) {
         return dictionaryValueDTO.getType().getDescription();
+    }
+
+    @Override
+    protected DictionaryValueFilter initFilter() {
+        return new DictionaryValueFilter();
     }
 
     @Override
@@ -128,7 +132,7 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
     }
 
     @Override
-    protected DictionaryValueDTO getEmptyDto() {
+    public DictionaryValueDTO getEmptyDto() {
         return new DictionaryValueDTO();
     }
 

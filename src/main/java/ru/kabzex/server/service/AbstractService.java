@@ -17,6 +17,7 @@ import ru.kabzex.server.entity.dictionary.DictionaryValue_;
 import ru.kabzex.server.exception.SomeoneAlreadyModifiedEntityException;
 import ru.kabzex.server.exception.UpdateNotAllowedException;
 import ru.kabzex.server.repository.EntityRepository;
+import ru.kabzex.server.utils.ClassUtils;
 import ru.kabzex.server.utils.StringUtils;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
 import ru.kabzex.ui.vaadin.dto.AbstractUpdatableDTO;
@@ -71,7 +72,9 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
     @Transactional
     public <D extends AbstractDTO> E saveFromDto(D dto) {
         if (dto.getId() != null) {
-            if (dto instanceof AbstractUpdatableDTO updatableDTO) {
+            if (!dto.getEntityClass().equals(getEntityClass())) {
+                throw new UpdateNotAllowedException("Некорректное использование сервиса");
+            } else if (dto instanceof AbstractUpdatableDTO updatableDTO) {
                 return updateFromDto(updatableDTO);
             } else {
                 throw new UpdateNotAllowedException("Обновление не предусмотрено");
@@ -225,5 +228,9 @@ public abstract class AbstractService<E extends AbstractEntity, R extends Entity
         return value.<Specification<E>>map(s -> (wd, cq, cb) ->
                 wd.get(attribute.getName())
                         .in(new HashSet<>(s))).orElse(null);
+    }
+
+    public Class<E> getEntityClass() {
+        return ClassUtils.getGenericParameterClass(this.getClass(), AbstractService.class, 0);
     }
 }

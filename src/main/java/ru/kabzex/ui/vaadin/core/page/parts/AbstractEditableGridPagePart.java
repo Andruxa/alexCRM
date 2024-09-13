@@ -38,9 +38,12 @@ F - Filter
 public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F extends DTOFilter> extends AbstractDataPagePart<DataProvider<D, F>> {
 
     public static final String EDIT_COLUMN = "EDIT";
+    @Getter
+    protected F filter = initFilter();
+
+    protected abstract F initFilter();
 
     protected Button addButton;
-    protected Collection<String> currentRoles;
     @Getter
     private final Grid<D> grid;
     private DataProvider dataProvider;
@@ -55,7 +58,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
 
     protected abstract void configureEditor();
 
-    protected abstract D getEmptyDto();
+    public abstract D getEmptyDto();
 
     protected abstract Grid<D> initGrid();
 
@@ -66,8 +69,9 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
         add(grid);
     }
 
+    @Override
     public void setCurrentRoles(Collection<String> cr) {
-        this.currentRoles = cr;
+        super.setCurrentRoles(cr);
         if (currentRoles != null &&
                 currentRoles.stream().anyMatch(getAllowedRoles()::contains)) {
             getGrid().addComponentColumn(this::gridEditDelButtons).setKey(EDIT_COLUMN);
@@ -121,6 +125,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
     private void editEvent(D dto) {
         if (getGrid().getEditor().isOpen())
             getGrid().getEditor().cancel();
+        getGrid().getEditor().setBuffered(true);
         getGrid().getEditor().editItem(dto);
     }
 
@@ -185,6 +190,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
                 dataProvider = getGrid().getDataProvider();
                 var dto = getEmptyDto();
                 getGrid().setDataProvider(DataProvider.ofItems(dto));
+                getGrid().getEditor().setBuffered(false);
                 getGrid().getEditor().editItem(dto);
             }
         }
