@@ -1,17 +1,13 @@
 package ru.kabzex.ui.vaadin.core.event;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import lombok.Getter;
-import ru.kabzex.ui.vaadin.dto.DTOFilter;
+import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 
 @Getter
-public class FilterChangedEvent<F extends DTOFilter> extends ComponentEvent<Component> {
-    private final F filter;
+public class FilterChangedEvent extends ComponentEvent<AbstractEditableGridPagePart> {
 
-
-    public FilterChangedEvent(Component source, F filter) {
+    public FilterChangedEvent(AbstractEditableGridPagePart source) {
         super(source, false);
-        this.filter = filter;
     }
 }

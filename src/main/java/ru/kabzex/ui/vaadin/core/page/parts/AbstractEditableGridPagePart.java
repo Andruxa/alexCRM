@@ -50,7 +50,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
     private final Set<ComponentEventListener<CreateEvent<D>>> createListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<UpdateEvent<D>>> updateListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<DeleteEvent<D>>> deleteListeners = new LinkedHashSet<>();
-    private final Set<ComponentEventListener<FilterChangedEvent<F>>> filterListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<FilterChangedEvent>> filterListeners = new LinkedHashSet<>();
 
     protected abstract Collection<String> getAllowedRoles();
 
@@ -196,11 +196,6 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
         }
     }
 
-    protected void filterChanged(F filter) {
-        var fe = new FilterChangedEvent<>(this, filter);
-        ComponentUtil.fireEvent(this, fe);
-    }
-
     private void registerHandlers() {
         ComponentUtil.addListener(this, CreateEvent.class,
                 (ComponentEventListener) ((ComponentEventListener<CreateEvent<D>>) e ->
@@ -218,7 +213,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
                                 .onComponentEvent(e))
                 ));
         ComponentUtil.addListener(this, FilterChangedEvent.class,
-                (ComponentEventListener) ((ComponentEventListener<FilterChangedEvent<F>>) e ->
+                (ComponentEventListener) ((ComponentEventListener<FilterChangedEvent>) e ->
                         filterListeners.forEach(listener -> listener
                                 .onComponentEvent(e))
                 ));
@@ -243,7 +238,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
     }
 
     public Registration addFilterChangedEventListener(
-            ComponentEventListener<FilterChangedEvent<F>> listener) {
+            ComponentEventListener<FilterChangedEvent> listener) {
         filterListeners.add(listener);
         return () -> filterListeners.remove(listener);
     }

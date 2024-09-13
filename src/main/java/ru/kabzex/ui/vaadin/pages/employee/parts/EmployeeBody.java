@@ -1,5 +1,6 @@
 package ru.kabzex.ui.vaadin.pages.employee.parts;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -10,6 +11,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import ru.kabzex.server.entity.employee.Employee_;
 import ru.kabzex.server.security.Roles;
+import ru.kabzex.ui.vaadin.core.event.FilterChangedEvent;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
@@ -58,7 +60,7 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
         name.setClearButtonVisible(true);
         name.addValueChangeListener(event -> {
                     filter.setName(event.getValue());
-                    filterChanged(filter);
+                    ComponentUtil.fireEvent(this, new FilterChangedEvent(this));
                 }
         );
         name.setSizeFull();
@@ -70,7 +72,7 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
         position.setClearButtonVisible(true);
         position.addValueChangeListener(event -> {
                     filter.setPosition(event.getValue());
-                    filterChanged(filter);
+                    ComponentUtil.fireEvent(this, new FilterChangedEvent(this));
                 }
         );
         position.setSizeFull();

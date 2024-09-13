@@ -1,6 +1,7 @@
 package ru.kabzex.ui.vaadin.pages.workobjects.parts;
 
 import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -14,6 +15,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import lombok.Getter;
 import ru.kabzex.server.entity.target.WorkObject_;
 import ru.kabzex.server.security.Roles;
+import ru.kabzex.ui.vaadin.core.event.FilterChangedEvent;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.document.ContractDto;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
@@ -50,7 +52,7 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         contractFilter.setClearButtonVisible(true);
         contractFilter.addValueChangeListener(event -> {
                     filter.setObjectContract(event.getValue());
-                    filterChanged(filter);
+                    ComponentUtil.fireEvent(this, new FilterChangedEvent(this));
                 }
         );
         contractFilter.setSizeFull();
@@ -62,7 +64,7 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         nameFilter.setClearButtonVisible(true);
         nameFilter.addValueChangeListener(event -> {
                     filter.setName(event.getValue());
-                    filterChanged(filter);
+                    ComponentUtil.fireEvent(this, new FilterChangedEvent(this));
                 }
         );
         nameFilter.setSizeFull();
@@ -74,7 +76,7 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         addressFilter.setClearButtonVisible(true);
         addressFilter.addValueChangeListener(event -> {
                     filter.setAddress(event.getValue());
-                    filterChanged(filter);
+                    ComponentUtil.fireEvent(this, new FilterChangedEvent(this));
                 }
         );
         addressFilter.setSizeFull();
@@ -86,7 +88,7 @@ public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, 
         managerFilter.setClearButtonVisible(true);
         managerFilter.addValueChangeListener(event -> {
                     filter.setEmployee(event.getValue());
-                    filterChanged(filter);
+                    ComponentUtil.fireEvent(this, new FilterChangedEvent(this));
                 }
         );
         managerFilter.setSizeFull();

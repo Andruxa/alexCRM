@@ -194,9 +194,9 @@ public class ClassUtils {
 
         } else {
 
-            throw new IllegalStateException("Argument " + typeVariable.toString() + " is not found in "
+            throw new IllegalStateException("Argument " + typeVariable + " is not found in "
 
-                    + genericDeclaration.toString() + ".");
+                    + genericDeclaration + ".");
 
         }
 

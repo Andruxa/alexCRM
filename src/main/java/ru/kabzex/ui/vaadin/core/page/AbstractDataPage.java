@@ -12,11 +12,13 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import ru.kabzex.server.entity.AbstractEntity;
-import ru.kabzex.server.entity.target.WorkObject;
 import ru.kabzex.server.exception.NoHandlerException;
 import ru.kabzex.server.exception.handler.CustomExceptionHandler;
 import ru.kabzex.server.service.AbstractService;
 import ru.kabzex.ui.vaadin.core.event.CreateEvent;
+import ru.kabzex.ui.vaadin.core.event.DeleteEvent;
+import ru.kabzex.ui.vaadin.core.event.FilterChangedEvent;
+import ru.kabzex.ui.vaadin.core.event.UpdateEvent;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
@@ -27,13 +29,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-public abstract class AbstractSmartPage extends VerticalLayout {
+public abstract class AbstractDataPage extends VerticalLayout {
 
     private final AuthenticationContext authenticationContext;
     private Map<Class, AbstractService> serviceMap;
 
 
-    protected AbstractSmartPage(AuthenticationContext authenticationContext) {
+    protected AbstractDataPage(AuthenticationContext authenticationContext) {
         this.authenticationContext = authenticationContext;
         setSizeFull();
     }
@@ -60,12 +62,32 @@ public abstract class AbstractSmartPage extends VerticalLayout {
         event.getSource().refresh();
     }
 
+    public <E extends AbstractEntity, D extends AbstractDTO<E>> void handle(UpdateEvent<D> event) {
+        var item = event.getItem();
+        var service = getService(item.getEntityClass());
+        service.saveFromDto(item);
+        event.getSource().refresh();
+    }
+
+    public <E extends AbstractEntity, D extends AbstractDTO<E>> void handle(DeleteEvent<D> event) {
+        var item = event.getItem();
+        var service = getService(item.getEntityClass());
+        service.deleteById(event.getItem().getId());
+        event.getSource().refresh();
+    }
+
+    public void handle(FilterChangedEvent event) {
+        var source = event.getSource();
+        var dto = source.getEmptyDto();
+        source.setData(getLazyObjectListDataProvider(dto.getEntityClass(), dto.getClass(), source.getFilter()));
+    }
+
     public void handle(AttachEvent attachEvent) {
         if (attachEvent.getSource() instanceof AbstractEditableGridPagePart source) {
             source.setCurrentRoles(getAuthenticationContext().getGrantedRoles());
             var dto = source.getEmptyDto();
             source.setData(getLazyObjectListDataProvider(dto.getEntityClass(), dto.getClass(), source.getFilter()));
-        }else {
+        } else {
             throw new NoHandlerException("Инициализирующий сценарий не реализован");
         }
     }
@@ -92,6 +114,6 @@ public abstract class AbstractSmartPage extends VerticalLayout {
             }
             var page = getService(entityClass).getAllByFilterAndMap(filter, offset, limit, Sort.by(springSortOrders), dtoClass);
             return page.stream();
-        }, countQuery -> Math.toIntExact(getService(WorkObject.class).countByFilter(filter)));
+        }, countQuery -> Math.toIntExact(getService(entityClass).countByFilter(filter)));
     }
 }

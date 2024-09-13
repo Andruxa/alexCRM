@@ -1,5 +1,6 @@
 package ru.kabzex.ui.vaadin.pages.dictionary.parts;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -11,6 +12,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import ru.kabzex.server.entity.dictionary.DictionaryValue_;
 import ru.kabzex.server.enums.Dictionary;
 import ru.kabzex.server.security.Roles;
+import ru.kabzex.ui.vaadin.core.event.FilterChangedEvent;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
@@ -69,7 +71,7 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
         typeFilter.setItems(Dictionary.values());
         typeFilter.addValueChangeListener(event -> {
                     filter.setType(event.getValue());
-                    filterChanged(filter);
+                    ComponentUtil.fireEvent(this, new FilterChangedEvent(this));
                 }
         );
         typeFilter.setSizeFull();
@@ -81,7 +83,7 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
         valFilter.setClearButtonVisible(true);
         valFilter.addValueChangeListener(event -> {
                     filter.setValue(event.getValue());
-                    filterChanged(filter);
+                    ComponentUtil.fireEvent(this, new FilterChangedEvent(this));
                 }
         );
         valFilter.setSizeFull();
@@ -93,7 +95,7 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
         descFilter.setClearButtonVisible(true);
         descFilter.addValueChangeListener(event -> {
                     filter.setDescription(event.getValue());
-                    filterChanged(filter);
+                    ComponentUtil.fireEvent(this, new FilterChangedEvent(this));
                 }
         );
         descFilter.setSizeFull();
