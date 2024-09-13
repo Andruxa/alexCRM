@@ -17,5 +17,5 @@ import ru.kabzex.server.entity.dictionary.DictionaryValue;
 public class Employee extends AbstractEntity {
     private String name;
     @ManyToOne
-    private DictionaryValue role;
+    private DictionaryValue position;
 }

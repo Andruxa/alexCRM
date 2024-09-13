@@ -16,10 +16,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.shared.Registration;
 import lombok.Getter;
 import ru.kabzex.ui.vaadin.core.dialog.ConfirmDialog;
-import ru.kabzex.ui.vaadin.core.event.CreateEvent;
-import ru.kabzex.ui.vaadin.core.event.DeleteEvent;
-import ru.kabzex.ui.vaadin.core.event.FilterChangedEvent;
-import ru.kabzex.ui.vaadin.core.event.UpdateEvent;
+import ru.kabzex.ui.vaadin.core.event.*;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
 import ru.kabzex.ui.vaadin.utils.NotificationUtils;
@@ -50,6 +47,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
     private final Set<ComponentEventListener<CreateEvent<D>>> createListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<UpdateEvent<D>>> updateListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<DeleteEvent<D>>> deleteListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<RequestDataProviderEvent>> dataRequiredListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<FilterChangedEvent>> filterListeners = new LinkedHashSet<>();
 
     protected abstract Collection<String> getAllowedRoles();
@@ -131,7 +129,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
 
     private void editorSave(Editor<D> editor) {
         var item = Optional.ofNullable(editor.getItem());
-        if (editor.getBinder().isValid() && item.isPresent()) {
+        if (editor.save() && item.isPresent()) {
             if (item.map(AbstractDTO::getId).isEmpty()) {
                 ConfirmDialog confirmationDialog = new ConfirmDialog("Сохранение записи",
                         "После нажатия запись будет сохранена",
@@ -190,7 +188,7 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
                 dataProvider = getGrid().getDataProvider();
                 var dto = getEmptyDto();
                 getGrid().setDataProvider(DataProvider.ofItems(dto));
-                getGrid().getEditor().setBuffered(false);
+                getGrid().getEditor().setBuffered(true);
                 getGrid().getEditor().editItem(dto);
             }
         }
@@ -217,12 +215,23 @@ public abstract class AbstractEditableGridPagePart<D extends AbstractDTO, F exte
                         filterListeners.forEach(listener -> listener
                                 .onComponentEvent(e))
                 ));
+        ComponentUtil.addListener(this, RequestDataProviderEvent.class,
+                (ComponentEventListener) ((ComponentEventListener<RequestDataProviderEvent>) e ->
+                        dataRequiredListeners.forEach(listener -> listener
+                                .onComponentEvent(e))
+                ));
     }
 
     public Registration addCreateEventListener(
             ComponentEventListener<CreateEvent<D>> listener) {
         createListeners.add(listener);
         return () -> createListeners.remove(listener);
+    }
+
+    public Registration addDataRequiredEventListener(
+            ComponentEventListener<RequestDataProviderEvent> listener) {
+        dataRequiredListeners.add(listener);
+        return () -> dataRequiredListeners.remove(listener);
     }
 
     public Registration addUpdateEventListener(

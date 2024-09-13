@@ -19,6 +19,7 @@ import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValueDTO, DictionaryValueFilter> {
 
@@ -48,7 +49,10 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
     }
 
     private String parseType(DictionaryValueDTO dictionaryValueDTO) {
-        return dictionaryValueDTO.getType().getDescription();
+        return Optional.ofNullable(dictionaryValueDTO)
+                .map(DictionaryValueDTO::getType)
+                .map(Dictionary::getDescription)
+                .orElse("Пусто");
     }
 
     @Override
@@ -107,7 +111,6 @@ public class DictionaryBody extends AbstractEditableGridPagePart<DictionaryValue
         Editor<DictionaryValueDTO> editor = getGrid().getEditor();
         Binder<DictionaryValueDTO> binder = new Binder<>(DictionaryValueDTO.class);
         editor.setBinder(binder);
-        editor.setBuffered(true);
 
         var type = new ComboBox<Dictionary>();
         type.setWidthFull();

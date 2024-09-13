@@ -25,6 +25,8 @@ public class EmployeePage extends AbstractDataPage {
         body.addUpdateEventListener(this::handle);
         body.addDeleteEventListener(this::handle);
         body.addFilterChangedEventListener(this::handle);
+        body.addAttachListener(this::handle);
+        body.addDataRequiredEventListener(this::handle);
         return body;
     }
 

@@ -28,7 +28,6 @@ import java.util.Optional;
 
 public class WorkObjectBody extends AbstractEditableGridPagePart<WorkObjectDto, WorkObjectFilter> {
     private static final List<String> ALLOWED = List.of(Roles.EMPLOYEE, Roles.ADMIN);
-    private final WorkObjectFilter filter = new WorkObjectFilter();
     @Getter
     private final Tab tab = new Tab("Объекты");
 

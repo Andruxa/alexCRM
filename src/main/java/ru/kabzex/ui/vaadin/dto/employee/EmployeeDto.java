@@ -6,6 +6,8 @@ import ru.kabzex.server.entity.employee.Employee;
 import ru.kabzex.ui.vaadin.dto.AbstractUpdatableDTO;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
 
+import java.util.Optional;
+
 @Getter
 @Setter
 public class EmployeeDto extends AbstractUpdatableDTO<Employee> {
@@ -13,6 +15,6 @@ public class EmployeeDto extends AbstractUpdatableDTO<Employee> {
     private DictionaryValueDTO position;
 
     public String getPositionValue() {
-        return getPosition().getValue();
+        return Optional.ofNullable(position).map(DictionaryValueDTO::getValue).orElse("Пусто");
     }
 }

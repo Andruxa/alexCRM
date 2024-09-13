@@ -30,6 +30,6 @@ public class EmployeeService extends AbstractService<Employee, EmployeeRepositor
         Optional<EmployeeFilter> optional = Optional.ofNullable((EmployeeFilter) filter);
         return eSpecification
                 .and(stringLike(Employee_.name, optional.map(EmployeeFilter::getName)))
-                .and(dictionaryValueLike(Employee_.role, optional.map(EmployeeFilter::getPosition)));
+                .and(dictionaryValueLike(Employee_.position, optional.map(EmployeeFilter::getPosition)));
     }
 }

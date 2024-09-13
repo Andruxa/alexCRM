@@ -15,10 +15,7 @@ import ru.kabzex.server.entity.AbstractEntity;
 import ru.kabzex.server.exception.NoHandlerException;
 import ru.kabzex.server.exception.handler.CustomExceptionHandler;
 import ru.kabzex.server.service.AbstractService;
-import ru.kabzex.ui.vaadin.core.event.CreateEvent;
-import ru.kabzex.ui.vaadin.core.event.DeleteEvent;
-import ru.kabzex.ui.vaadin.core.event.FilterChangedEvent;
-import ru.kabzex.ui.vaadin.core.event.UpdateEvent;
+import ru.kabzex.ui.vaadin.core.event.*;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.AbstractDTO;
 import ru.kabzex.ui.vaadin.dto.DTOFilter;
@@ -76,6 +73,11 @@ public abstract class AbstractDataPage extends VerticalLayout {
         event.getSource().refresh();
     }
 
+    public void handle(RequestDataProviderEvent event) {
+        var source = event.getSource();
+        source.setItems(getLazyObjectListDataProvider(event.getEntityClass(), event.getDataClass(), event.getFilter()));
+    }
+
     public void handle(FilterChangedEvent event) {
         var source = event.getSource();
         var dto = source.getEmptyDto();
@@ -91,6 +93,7 @@ public abstract class AbstractDataPage extends VerticalLayout {
             throw new NoHandlerException("Инициализирующий сценарий не реализован");
         }
     }
+
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {

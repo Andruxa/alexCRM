@@ -9,11 +9,14 @@ import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import ru.kabzex.server.entity.dictionary.DictionaryValue;
 import ru.kabzex.server.entity.employee.Employee_;
+import ru.kabzex.server.enums.Dictionary;
 import ru.kabzex.server.security.Roles;
 import ru.kabzex.ui.vaadin.core.event.FilterChangedEvent;
 import ru.kabzex.ui.vaadin.core.page.parts.AbstractEditableGridPagePart;
 import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueDTO;
+import ru.kabzex.ui.vaadin.dto.dictionary.DictionaryValueFilter;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeDto;
 import ru.kabzex.ui.vaadin.dto.employee.EmployeeFilter;
 
@@ -22,7 +25,6 @@ import java.util.List;
 
 public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, EmployeeFilter> {
     private static final Collection<String> ALLOWED = List.of(Roles.ADMIN);
-    private final EmployeeFilter filter = new EmployeeFilter();
 
     @Override
     protected Grid<EmployeeDto> initGrid() {
@@ -84,11 +86,16 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
         Editor<EmployeeDto> editor = getGrid().getEditor();
         Binder<EmployeeDto> binder = new Binder<>(EmployeeDto.class);
         editor.setBinder(binder);
-        editor.setBuffered(true);
 
         var position = new ComboBox<DictionaryValueDTO>();
         position.setWidthFull();
         position.setItemLabelGenerator(DictionaryValueDTO::getValue);
+        var dFilter = new DictionaryValueFilter();
+        dFilter.setType(Dictionary.EMPLOYEE_ROLES);
+        position.addAttachListener(e -> dataProviderRequired((ComboBox) e.getSource(),
+                DictionaryValueDTO.class,
+                DictionaryValue.class,
+                dFilter));
         binder.forField(position)
                 .bind(EmployeeDto::getPosition, EmployeeDto::setPosition);
         getGrid().getColumnByKey(Employee_.ROLE).setEditorComponent(position);
