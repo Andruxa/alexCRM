@@ -36,7 +36,7 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
         grid.addColumn(EmployeeDto::getPositionValue)
                 .setHeader("Должность")
                 .setSortable(true)
-                .setKey(Employee_.ROLE)
+                .setKey(Employee_.POSITION)
                 .setFlexGrow(1);
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
         return grid;
@@ -78,7 +78,7 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
                 }
         );
         position.setSizeFull();
-        filterHeader.getCell(getGrid().getColumnByKey(Employee_.ROLE)).setComponent(position);
+        filterHeader.getCell(getGrid().getColumnByKey(Employee_.POSITION)).setComponent(position);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class EmployeeBody extends AbstractEditableGridPagePart<EmployeeDto, Empl
                 dFilter));
         binder.forField(position)
                 .bind(EmployeeDto::getPosition, EmployeeDto::setPosition);
-        getGrid().getColumnByKey(Employee_.ROLE).setEditorComponent(position);
+        getGrid().getColumnByKey(Employee_.POSITION).setEditorComponent(position);
 
         var name = new TextField();
         name.setWidthFull();
